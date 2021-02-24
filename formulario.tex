@@ -1,6 +1,13 @@
 \documentclass{article}
 \usepackage[fleqn]{amsmath}
 \usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{mathtools}
+\usetikzlibrary{arrows}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{soul}
+\newcommand{\R}{\mathbb{R}}
 \title{Model Identification and Data Analysis cheatsheet}
 \author{Matteo Secco}
 \begin{document}
@@ -39,7 +46,7 @@ $\lambda^2 (t)=Var[v(t)]$
 $\gamma(t_1,t_2)=E[(v(t_1)-m(t_1))(v(t_2)-m(t_2))]=\gamma(t_2,t_1)$
 \paragraph{Normalized Covariance Function}
 $\rho(\tau)=\frac{\gamma(\tau)}{\gamma(0)}$\\
-$\forall$stationary processes: $|\rho(\tau)|\leq1	\quad\forall\tau$
+$\forall$ stationary processes: $|\rho(\tau)|\leq1	\quad\forall\tau$
 
 \subsection{Important process classes}
 
@@ -60,25 +67,76 @@ $v(t)=\alpha \eta (t)+\beta	\quad
 \qquad\implies\qquad 
 v(t)\sim WN(\beta,\alpha^2 \lambda^2)$
 
+\section{Spectral Analysis}
+
+\subsection{Foundamentals}
+\paragraph{Spectrum} \[
+\Gamma(\omega)=\overbrace{F(\gamma(\tau))}^\text{Fourier transform}=\sum_{\tau=-\infty}^{+\infty}\gamma(\tau)\cdot e^{-j\omega\tau}
+\]
+\paragraph{Euler formula} $\Gamma(\omega)=\gamma(0)+2cos(\omega)\gamma(1)+2cos(2\omega)\gamma(2)+...$
+\paragraph{Spectrum properties} 
+\begin{itemize}
+	\item $\Gamma: \R \to \R$
+	\item $\Gamma\text{ is periodic with }T=2\pi$
+	\item $\Gamma\text{ is even }[\Gamma(-\omega)=\Gamma(\omega)]$
+	\item $\Gamma(\omega)\geq 0 \quad \forall\omega$
+\end{itemize}
+$\eta(t) \sim WN(0,\lambda^2) \quad\implies\quad \Gamma_\eta(\omega)=\gamma(0)=Var[\eta(t)]=\lambda^2$
+\paragraph{Anti-Transform}
+\[
+\gamma(\tau)=\frac{1}{2\pi}\int_{-\pi}^{+\pi} \Gamma(\omega)e^{k\omega\tau}\,dw
+\]
+\paragraph{Complex spectrum}
+\[
+\phi(z)=\sum_{\tau =-\infty}^{+\infty} \omega(\tau)z^{-\tau}
+\]
+$\Gamma(\omega)=\Phi(e^{j\omega})$
+
+\subsection{Fundamental theorem of Spectral Analysis} 
+
+\paragraph{Fundamental theorem of Spectral Analysis} allows to derive the (real and/or complex) spectrum of the output from  the input and the transfer function of the system
+
+\tikzstyle{block}=[draw, minimum size=3.5em]
+
+\begin{tikzpicture}[node distance=5em,auto,>=latex']
+    \node [block] (W) {$W(z)$};
+    \node (u) [left of=W, coordinate] {};
+    \node [coordinate] (y) [right of=W]{};
+    \path[->] (u) edge node {$u$} (W);
+    \path[->] (W) edge node {$y$} (y);
+\end{tikzpicture}
+
+\begin{alignat*}{2}
+	\Gamma_{yy}(\omega)&=|W(e^{j\omega})|^2 & \cdot \Gamma_{uu}(\omega)\\
+	\Phi_{yy}(z)&=W(z)W(z^{-1})				& \cdot \Phi_{uu}(z)
+\end{alignat*}
+
 \section{Moving Average Processes}
 Given $\eta(t) \sim WN(0,\lambda^2)$
 \paragraph{MA(1): }
 $v(t)=c_0\eta(t)+c_1\eta(t-1)$\\
+
+
 \subparagraph{Mean}
 \begin{alignat*}{2}
 	E[v(t)]		&=	c_0\cdot E[\eta(t)]	&	&+	c_1\cdot E[\eta(t)]	\\
 				&=	c_0\cdot 0			&	&+	c_1\cdot 0			\\
-				&=	0				&
+	\Aboxed{E[v(t)]&=0}
 \end{alignat*}\\
+
+
 \subparagraph{Variance}
 \begin{alignat*}{3}
-	Var[v(t)	]	&=	E[(v(t)	\underbrace{-E[v(t)])^2}_{0}]													\\
+	Var[v(t)]	&=	E[(v(t)	\underbrace{-E[v(t)])^2}_{0}]													\\
 				&=	E[(v(t))^2]						\\
 				&=	E[(c_0\cdot	\eta(t)^2		&+&	c_1\cdot	\eta(t-1))^2]	\\
 				&=	c_0^2\cdot 	E[\eta(t)^2]		&+&	c_1^2\cdot E[\eta(t-1)^2]	&+	\underbrace{2 c_0 c_1 \cdot E[\eta(t)\eta(t-1)]}_0\\
 				&=	c_0^2\cdot 	E[\eta(t)^2]		&+&	c_1^2\cdot E[\eta(t-1)^2]\\
-				&=	c_0^2\lambda^2				&+&	c_1^2\lambda^2
+				&=	c_0^2\lambda^2				&+&	c_1^2\lambda^2\\
+	\Aboxed{Var[v(t)]&=(c_0^2+c_1^2)\lambda^2}
 \end{alignat*}
+
+
 \subparagraph{Covariance}
 \begin{alignat*}{4}
 	\gamma(t_1,t_2)	&=	E[(v(t_1)-E[v(t_1)])				&\cdot 	&		(v(t_2)-E[v(t_2)])]\\
@@ -88,11 +146,13 @@ $v(t)=c_0\eta(t)+c_1\eta(t-1)$\\
 						+c_0c_1E[\eta(t_1-1)\eta(t_2)]
 \end{alignat*}
 \[
-\gamma(t_1,t_2)=\begin{cases}
-	c_0^2\lambda^2+c_1^2\lambda^2	&\text{if } t_1=t_2\\
-	c_0c_1\lambda^2					&\text{if }	t_1=t_2\pm 1\\
-	0								&\text{otherwise}
-\end{cases}
+\boxed{
+	\gamma(\tau)=\begin{cases}
+		c_0^2\lambda^2+c_1^2\lambda^2	&\text{if }\tau=0\\
+		c_0c_1\lambda^2					&\text{if }\tau=\pm 1\\
+		0								&\text{otherwise}
+	\end{cases}
+}
 \]
 
 \end{document}
