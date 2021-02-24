@@ -1,0 +1,98 @@
+\documentclass{article}
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\title{Model Identification and Data Analysis cheatsheet}
+\author{Matteo Secco}
+\begin{document}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{Probability Recall}
+
+\subsection{Random Vectors}
+
+\paragraph{Variance}
+$Var[v]=E[(v-E[v])^2]$
+\paragraph{Cross-Variance}
+$Var[v,u]=E[(v-E[v])(u-E[u])]$
+\paragraph{Variance Matrix}
+$\begin{vmatrix}
+	Var[v_1]			&	.	&	.	&	Var[v_1,v_k]		\\
+		.			&	.	&		&		.			\\
+		.			&		&	.	&		.			\\
+	Var[v_k,v_1]		&	.	&	.	&	Var[v_k]			\\
+				
+\end{vmatrix}$
+\paragraph{Covariance coefficient}
+	$\delta[i,j]=\frac{Var[i,j]}{\sqrt{Var[i]}\sqrt{Var[j]}}$\\
+	$\delta[i,j]=0 \implies$ i, j uncorrelated\\
+	$\left|\delta[i,j]\right|=1 \implies i=\alpha j$
+	
+\subsection{Random processes} $v(t,s) |$ t time instant, s expetiment outcome (generally given)
+
+\paragraph{Mean} $m(t)=E[v(t,s)]$
+\paragraph{Variance}
+$\lambda^2 (t)=Var[v(t)]$ 
+\paragraph{Covariance function}
+$\gamma(t_1,t_2)=E[(v(t_1)-m(t_1))(v(t_2)-m(t_2))]=\gamma(t_2,t_1)$
+\paragraph{Normalized Covariance Function}
+$\rho(\tau)=\frac{\gamma(\tau)}{\gamma(0)}$\\
+$\forall$stationary processes: $|\rho(\tau)|\leq1	\quad\forall\tau$
+
+\subsection{Important process classes}
+
+\paragraph{Stationary process}
+\begin{itemize}
+	\item $m(t)=m$ constant
+	\item $\lambda^2 (t)=\lambda^2$ constant
+	\item $\gamma(t_1,t_2)=f(t_2-t_1)=\gamma(\tau)$ covariance depends only on time difference $\tau$
+\end{itemize}
+$|\gamma(\tau)|\leq\gamma(0)		\quad\forall\tau$
+\paragraph{White noise} $\eta(t)\sim WN(m,\lambda^2)$
+\begin{itemize}
+	\item Stationary process
+	\item $\gamma(\tau)=0	\quad\forall\tau\neq0$
+\end{itemize}
+$v(t)=\alpha \eta (t)+\beta	\quad 
+\eta (t)\sim WN(0,\lambda^2)	
+\qquad\implies\qquad 
+v(t)\sim WN(\beta,\alpha^2 \lambda^2)$
+
+\section{Moving Average Processes}
+Given $\eta(t) \sim WN(0,\lambda^2)$
+\paragraph{MA(1): }
+$v(t)=c_0\eta(t)+c_1\eta(t-1)$\\
+\subparagraph{Mean}
+\begin{alignat*}{2}
+	E[v(t)]		&=	c_0\cdot E[\eta(t)]	&	&+	c_1\cdot E[\eta(t)]	\\
+				&=	c_0\cdot 0			&	&+	c_1\cdot 0			\\
+				&=	0				&
+\end{alignat*}\\
+\subparagraph{Variance}
+\begin{alignat*}{3}
+	Var[v(t)	]	&=	E[(v(t)	\underbrace{-E[v(t)])^2}_{0}]													\\
+				&=	E[(v(t))^2]						\\
+				&=	E[(c_0\cdot	\eta(t)^2		&+&	c_1\cdot	\eta(t-1))^2]	\\
+				&=	c_0^2\cdot 	E[\eta(t)^2]		&+&	c_1^2\cdot E[\eta(t-1)^2]	&+	\underbrace{2 c_0 c_1 \cdot E[\eta(t)\eta(t-1)]}_0\\
+				&=	c_0^2\cdot 	E[\eta(t)^2]		&+&	c_1^2\cdot E[\eta(t-1)^2]\\
+				&=	c_0^2\lambda^2				&+&	c_1^2\lambda^2
+\end{alignat*}
+\subparagraph{Covariance}
+\begin{alignat*}{4}
+	\gamma(t_1,t_2)	&=	E[(v(t_1)-E[v(t_1)])				&\cdot 	&		(v(t_2)-E[v(t_2)])]\\
+					&=	E[(c_0\eta(t_1)+c_1\eta(t_1-1))	&\cdot 	&		(c_0\eta(t_2)+c_1\eta(t_2-1))]\\
+					&=	c_0^2E[\eta(t_1)\eta(t_2)]		&+&				c_1^2E[\eta(t_1-1)\eta(t_2-1)\\
+					&									&+&				c_0c_1E[\eta(t_1)\eta(t_2-1)]
+						+c_0c_1E[\eta(t_1-1)\eta(t_2)]
+\end{alignat*}
+\[
+\gamma(t_1,t_2)=\begin{cases}
+	c_0^2\lambda^2+c_1^2\lambda^2	&\text{if } t_1=t_2\\
+	c_0c_1\lambda^2					&\text{if }	t_1=t_2\pm 1\\
+	0								&\text{otherwise}
+\end{cases}
+\]
+
+\end{document}
