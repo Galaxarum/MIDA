@@ -115,8 +115,9 @@ $\eta(t) \sim WN(0,\lambda^2) \quad\implies\quad \Gamma_\eta(\omega)=\gamma(0)=V
 
 \section{Moving Average Processes}
 Given $\eta(t) \sim WN(0,\lambda^2)$
-\paragraph{MA(1): }
-$v(t)=c_0\eta(t)+c_1\eta(t-1)$\\
+\subsection{MA(1): }
+\paragraph{Model}
+\[v(t)=c_0\eta(t)+c_1\eta(t-1)\]
 
 
 \subparagraph{Mean}
@@ -156,5 +157,180 @@ $v(t)=c_0\eta(t)+c_1\eta(t-1)$\\
 	\end{cases}
 }
 \]
+
+\subsection{MA(n)}
+
+\paragraph{Model}
+\begin{align*}
+v(t)&=c_0\eta(t)+c_1\eta(t-1)+...+c_n\eta(t-n)\\
+&=(c_0+c_1z^{-1}+...+c_nz^{-n})\eta(t)
+\end{align*}
+
+\paragraph{Transfer function}
+\[W(z)
+=c_0+c_1z^{-1}+...+c_nz^{-n}
+=\frac{c_0z^n+c_1z^{n-1}+...+c_n}{z^n}
+\]\\
+All poles are in the complex origin
+
+\paragraph{Mean}
+\begin{alignat*}{2}
+E[v(t)]&=(c_0+c_1+...+c_n)\underbrace{E[\eta(t)]}_0\\
+\Aboxed{E[v(t)&=0}
+\end{alignat*}
+
+\paragraph{Covariance function}
+\[
+\boxed{
+\gamma(\tau)=
+\begin{cases}
+\lambda^2\cdot \sum_{i=0}^{n-\tau} c_ic_{i-\tau}	&	|\tau|\leq n\\
+0	& \text{otherwise}
+\end{cases}
+}
+\]
+\subparagraph{example}
+\begin{align*}
+\gamma(0)&=(c_0^2+c_1^2+...+c_n^2)\lambda^2\\
+\gamma(1)&=(c_0c_1+c_1c_2+...+c_{n-1}c_n)\lambda^2\\
+\gamma(2)&=(c_0c_2+c_1c_3+...+c_{n-2}c_n)\lambda^2\\
+&...\\
+\lambda(n)&=(c_0c_n)\lambda^2\\
+\lambda(k)&=0\:\forall k>n
+\end{align*}
+
+\subsection{MA($\infty$)}
+\paragraph{Model}
+\[
+v(t)=c_0\eta(t)+c_1\eta(t-1)+...+c_k\eta(t-k)+...=\sum_{i=0}^{\infty}c_i\eta(t-i)
+\]
+\paragraph{Variance}
+\[
+\gamma(0)
+=(c_0^2+c_1^2+...+c_k^2+...) \lambda^2
+=\lambda^2 \sum_{i=0}^{\infty} c_i^2
+\]
+\subsection{Well definition of an MA($\infty$)}
+We need to have $|\gamma(\tau)|\leq \gamma(0)$, so we must require that \\
+$\boxed{ \gamma(0)=\lambda^2 \sum_{i=0}^{\infty} c_i^2 \text{ is finite}}$
+
+\section{Auto Regressive Processes}
+\subsection{AR(1)}
+\paragraph{Model}
+\[v(t)=av(t-1)+\eta(t)\]
+\paragraph{Mean}
+\begin{alignat*}{2}
+E[v(t)]&=E[av(t-1)]+\overbrace{E[\eta(t)]}^0\\
+&=aE[v(t-1)]\\
+&=aE[v(t)]\\
+(1-a)E[v(t)]&=0\\
+\Aboxed{
+E[v(t)]&=0
+}
+\end{alignat*}
+\paragraph{Covariance}
+\subparagraph{MA($\infty$) method}
+Observe as an AR(1) can  be axpressed as an MA($\infty$)
+\begin{align*}
+v(t)
+&=av(t-1)	&+&		\eta(t)\\
+&=a[av(t-2)+\eta(t-1)]	&+&	\eta(t)\\
+&=a^2v(t-2)				&+&	a\eta(t-1) + \eta(t)\\
+&=a^2[v(t-3)+\eta(t-2)]	&+& a\eta(t-1) + \eta(t)\\
+&=\underbrace{a^nv(t-n)}_{\to 0}+ \underbrace{\sum_{i=0}^\infty a^i\eta(t-i)}_{\text{MA($\infty$)}}
+\end{align*}
+In particular, the result depends on an $MA(\infty)$ having $\sum_{i=0}^{\infty} c_i = \sum_{i=0}^{\infty} a^i$.\\
+To check if the variance is finite we check $\gamma(0)=\lambda^2 \sum_{i=0}^{\infty} a^{2i}<\infty$. The given is a geometric series, convergent for $|a|<1$. Under this hypothesis its value is
+\[
+\gamma(0)=\lambda^2 \sum_{i=0}^{\infty} a^{2i}=\frac{\lambda^2}{1-a^2}
+\] 
+Applying the formula of the variance of MA processes we get\\
+\hspace*{-1cm}\vbox{	%slightly move these equations to the right
+ 
+ \begin{alignat*}{7}
+\gamma(1)
+	&=(c_0c_1+c_1c_2+...)\lambda^2
+	&=(a+aa^2+...)\lambda^2
+	&=a(1+a^2+a^4+...)\lambda^2
+	&=a\lambda^2\sum_{i=0}^{\infty} a^{2i}
+	&=a\frac{\lambda^2}{1-a^2}
+	&=a\gamma(0)\\
+\gamma(2)
+	&=(c_0c_2+c_1c_3+...)\lambda^2
+	&=(a^2+aa^3+...)\lambda^2
+	&=a^2(1+a^2+a^4+...)\lambda^2
+	&=a^2\lambda^2\sum_{i=0}^{\infty} a^{2i}
+	&=a^2\frac{\lambda^2}{1-a^2}
+	&=a^2\gamma(0)\\
+\Aboxed{
+\gamma(\tau)&=a^{|\tau|}\frac{\lambda^2}{1-a^2}
+}
+\end{alignat*}
+} 
+\subparagraph{Yule-Walkler Equations}
+\begin{align*}
+Var[v(t)]	
+	&=E[v(t)^2]\\
+	&=E[(av(t)+\eta(t))^2]\\
+	&=a^2\underbrace{E[v(t-1)^2]}_{\substack{=Var[v(t-1)]\\=Var[v(t)]\\=\gamma(0)}}
+		+\underbrace{E[\eta(t)^2]}_{=\lambda^2}
+		+2a \underbrace{E[v(t-1)\eta(t)]}_{
+					\substack{	v(t-1)\text{ depends on } \eta(t-2)\\
+								\eta(t)\text{ independent of }\eta(t-2)\\
+								\implies\\
+								E[v(t-1)\eta(t)]=0\\
+								}}\\
+\gamma(0)&=a^2\gamma(0)+\lambda^2\\
+\Aboxed{
+\gamma(0)&=\frac{\lambda^2}{1-a^2}
+}
+\end{align*}
+To find $\gamma(\tau)$, we start from the model $v(t)=av(t-1)+\eta(t)$.
+\begin{alignat*}{4}
+v(t)&=av(t-1)&+&\eta(t)\\
+v(t)v(t-\tau)&=av(t-1)v(t-\tau)&+&\eta(t)v(t-\tau)\\
+\underbrace{E[v(t)v(t-\tau)]}_{\gamma(\tau)}&=
+	a\underbrace{E[v(t-1)v(t-\tau)]}_{\gamma(\tau-1)}&+&
+	\underbrace{E[\eta(t)v(t-\tau)]}_0\\
+\Aboxed{
+\gamma(\tau)&=a\gamma(\tau-1)
+}
+\end{alignat*}
+We can join the two by inductive reasoning, obtaining
+\[\boxed{
+\gamma(\tau)=a^{|\tau|}\frac{\lambda^2}{1-a^2}
+}\]
+\subparagraph{Long Division} Leads to same result, but is boring
+
+\subsection{AR(n)}
+\paragraph{Model}
+\[
+v(t)=a_1v(t-1)+a_2v(t-2)+...+a_nv(t-n)+\eta(t)
+\]
+\paragraph{Transfer function}
+\[
+W(z)=\frac{z^n}{z^n-a_1z_{n-1}-...-a_n}
+\]
+\paragraph{Mean}
+\begin{alignat*}{6}
+E[v(t)]	&=	a_1E[v(t-1])	&+&a_2E[v(t-2)]	&+&...	&+&a_nE[v(t-n)]	&+&\underbrace{E[\eta(t)]}_0\\
+m		&=	a_1m			&+&a_2m			&+&...	&+&a_nm\\
+(1-a_1-a_2-...-a_n)m&=0\\
+\Aboxed{
+E[v(t)]&=0
+}
+\end{alignat*}
+\section{ARMA Processes}
+\paragraph{Model}
+\[
+v(t)=
+	a_1v(t-1)+...+a_{n_a}v(t-n_a)+
+	c_0\eta(t)+...+c_{n_c}v(t-n_c)
+\]
+Can also be espressed as $V(t)=\frac{C(z)}{A(z)}\eta(t)$, where
+\begin{align*}
+C(z)&=c_0+c_1z^{-1}+...+c_{n_c}z^{-n_c}\\
+A(z)&=1-a_1z^{-1}-...-a_{n_a}z^{-n_a}
+\end{align*}
 
 \end{document}
