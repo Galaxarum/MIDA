@@ -1,21 +1,25 @@
 \documentclass{article}
 \usepackage[fleqn]{amsmath}
 \usepackage{amssymb}
-\usepackage{tikz}
 \usepackage{mathtools}
+
+\usepackage{tikz}
 \usetikzlibrary{arrows}
-\usepackage{hyperref}
-\usepackage{xcolor}
-\usepackage{soul}
+
+\usepackage{titlesec, hyperref}
+\newcommand{\sectionbreak}{\clearpage}
 \newcommand{\R}{\mathbb{R}}
-\title{Model Identification and Data Analysis cheatsheet}
+
+\title{Model Identification and Data Analysis}
 \author{Matteo Secco}
+
 \begin{document}
 \maketitle
 \newpage
 \tableofcontents
 \newpage
 
+\part{Prediction}
 \section{Probability Recall}
 
 \subsection{Random Vectors}
@@ -112,6 +116,15 @@ $\eta(t) \sim WN(0,\lambda^2) \quad\implies\quad \Gamma_\eta(\omega)=\gamma(0)=V
 	\Gamma_{yy}(\omega)&=|W(e^{j\omega})|^2 & \cdot \Gamma_{uu}(\omega)\\
 	\Phi_{yy}(z)&=W(z)W(z^{-1})				& \cdot \Phi_{uu}(z)
 \end{alignat*}
+
+\subsection{Canonical representation of a Stationary Process}
+A stationary process can be represented by an infinite number of transfer functions. The canonical representation is the transfer function $W(z)$ such that:
+\begin{itemize}
+\item Numerator and denominator have \underline{same degree}
+\item Numerator and denominator are \underline{monic} (highest grade coefficient is 1)
+\item Numerator and denominator are \underline{coprime} ($W(z)$ cannot be simplified)
+\item numerator and denominator are \underline{stable polynomials} (all poles and zeros of $W(z)$ are inside the unit disk)
+\end{itemize}
 
 \section{Moving Average Processes}
 Given $\eta(t) \sim WN(0,\lambda^2)$
@@ -332,5 +345,200 @@ Can also be espressed as $V(t)=\frac{C(z)}{A(z)}\eta(t)$, where
 C(z)&=c_0+c_1z^{-1}+...+c_{n_c}z^{-n_c}\\
 A(z)&=1-a_1z^{-1}-...-a_{n_a}z^{-n_a}
 \end{align*}
+Such process is stationary if all the poles of $W(z)$ are inside the unit disk.
 
+\section{Prediction problem}
+We want to predict $v(t+r)$ from $v(t), v(t-1), ...$, where $r$ is called prediction horizon, of the following stationary process:
+
+\tikzstyle{block}=[draw, minimum size=3.5em]
+
+\begin{tikzpicture}[node distance=5em,auto,>=latex']
+    \node [block] (W) {$W(z)$};
+    \node (wn) [left of=W, coordinate] {};
+    \node [coordinate] (v) [right of=W]{};
+    \path[->] (wn) edge node {$\eta$} (W);
+    \path[->] (W) edge node {$v$} (v);
+\end{tikzpicture}
+
+\subsection{Fake problem}
+Having a process with transfer function $W(z)$, we can compute it in polynomial form using the long division algorithm
+\[
+W(z)=w_0+w_1z^{-1}+w_2z^{-2}+...
+\]
+We can calculate
+\[
+v(t+r)=W(z)\eta(t+r)
+= \underbrace{w_0 \eta(t+r)+w_1 \eta(t+r-1)+...+w_{r-1} \eta(t+1)}_{\alpha(t)\textbf{ unpredictable: }\text{future of }\eta\text{ involved}}
++ \underbrace{w_r \eta(t)+w_{r+1} \eta(t-1)+...}_{\beta(t) \textbf{ predictable}}
+\]
+The optimal fake predictor is then
+\[
+\boxed{
+v(t+r|t)=w_r \eta(t)+w_{r+1}\eta(t-1)+...
+}=\beta(t)
+\]
+And the prediction error is
+\begin{align*}
+\epsilon(t)&=v(t+r)&-&\hat{v}(t+r|t)\\
+&= \alpha(t)+\beta(t)&-&\beta(t)\\
+&=\alpha(t)\\
+\end{align*}
+\[
+\boxed{
+\epsilon(t)=w_0 \eta(t+r)+w_1 \eta(t+r-1)+...+w_{r-1} \eta(t+1)
+}
+\]
+\[
+\boxed{
+Var[\epsilon(t)]=(w_0^2+w_1^2+...+w_{r-1}^2)\lambda^2
+}
+\]
+\subsection{True Problem}
+We want to estimate $v(t+r)$ form $v(t)$, having transfer function $W(z)$ and $\hat{W}_r(z)$ the solution to the fake problem. We can calculate the transfer function of the real predictor from the process as 
+\[
+\boxed{
+W_r(z)=W(z)^{-1} \cdot \hat{W}_r(z)
+}
+\]
+For ARMA processes a shortcut exists:
+\[
+\hat{v}_{\text{ARMA}}(t|t-1)=\frac{C(z)A(z)}{C(z)}
+\qquad \text{having } W(z)=\frac{C(z)}{A(z)}
+\]
+\subsection{Prediction with eXogenous variables}
+An exogenous variable is a \underline{deterministic} input variable in the system
+\subsubsection{ARX model}
+\begin{align*}
+v(t)&=a_1v(t-1)+...+a_{n_a}v(t-n_a)+b_1u(t-1)+...+b_{n_b}u(t-n_b)+\eta(t)
+A(z)v(t)&=B(z)u(t-1)+\eta(t)
+\end{align*}
+\paragraph{Transfer functions from u and $\eta$}
+\[
+W_u(z)=\frac{B(z)}{A(z)}\\
+W_{\eta}(z)=\frac{1}{A(z)}
+\]
+\subsubsection{ARMAX model}
+\begin{align*}
+A(z)v(t)&=C(z)\eta(t)+B(z)u(t-1)\\
+y(t)&=W(z)\eta(t)+G(z)u(t)
+\end{align*}
+\paragraph{Predictor}
+\[
+\hat{y}(t|t-1)=
+\frac{C(z)-A(z)}{C(z)}y(t)
++\frac{B(z)}{C(z)}u(t-1)
+\]
+
+\newpage
+\part{Identification}
+Consists of estimating a model from data.
+\section{Prediction Error Minimization} Aims to minimize $\epsilon(t)=v(t)-\hat{v}(t|t-r)$\\
+Steps:
+\begin{enumerate}
+\item \textbf{Data collection:} collect $\vec{u}$ and $\vec{y}$
+\item \textbf{Family selection:} choose a family of models $M(\theta)$
+	\begin{description}
+	\item[MA(1)] $\theta=[a]$
+	\item[MA(n)] $\theta=[a_1,...,a_n]$
+	\item[ARMA($n_a,n_c$)] $\theta=[a_1,...,a_{n_a},
+	c_1,...,c_{n_c}]$
+	\item[...]
+	\end{description}
+\item \textbf{Select an optimization criterion}
+	\begin{description}
+	\item[Mean Squared error] $J(\theta)=\frac{1}{N}\sum_{t=1}^N \epsilon_\theta(t)^2$
+	\item[Mean absolute error] $J(\theta)=\frac{1}{N}\sum_{t=1}^N |\epsilon_\theta(t)|$
+	\item[...]
+	\end{description}
+\item  \textbf{Optimization} find $\hat{\theta}=argmin\,J(\theta)\implies \frac{dJ(\theta)}{d\theta}=0$
+\item \textbf{Validation} verify if the result satisfies the requirements
+\end{enumerate}
+
+\newpage
+\appendix
+\part{Cheatsheet}
+\section{Probability Recall}
+\paragraph{Cross-Variance}
+$Var[v,u]=E[(v-E[v])(u-E[u])]$
+\paragraph{Variance Matrix}
+$\begin{vmatrix}
+	Var[v_1]			&	.	&	.	&	Var[v_1,v_k]		\\
+		.			&	.	&		&		.			\\
+		.			&		&	.	&		.			\\
+	Var[v_k,v_1]		&	.	&	.	&	Var[v_k]			\\
+				
+\end{vmatrix}$
+\paragraph{Covariance coefficient}
+	$\delta[i,j]=\frac{Var[i,j]}{\sqrt{Var[i]}\sqrt{Var[j]}}$
+\paragraph{Stationary process}
+\begin{itemize}
+	\item $m$ constant
+	\item $\lambda^2$ constant
+	\item covariance $\gamma(\tau)$ depends only on time difference
+	\item $|\gamma(\tau)|\leq\gamma(0)		\quad\forall\tau$
+\end{itemize}
+\paragraph{White noise} $\eta(t)\sim WN(m,\lambda^2)$
+\begin{itemize}
+	\item Stationary process
+	\item $\gamma(\tau)=0	\quad\forall\tau\neq0$
+	\item $v(t)=\alpha \eta (t)+\beta\implies v(t)\sim WN(\beta,\alpha^2 \lambda^2)$
+\end{itemize}
+\paragraph{Canonical representation}
+\begin{itemize}
+\item Monic
+\item Same degree
+\item Coprime
+\item Poles and zeros in unit disk
+\end{itemize}
+\section{Spectral analysis}
+\paragraph{Spectrum}
+\begin{itemize}
+\item $\Gamma(\omega)=\gamma(0)+2cos(\omega)\gamma(1)+2cos(2\omega)\gamma(2)+...$
+\item Periodic $T=2\pi$
+\item Even
+\item $\Gamma_\eta(\omega)=\gamma_\eta(0)=\lambda^2$
+\end{itemize}
+\paragraph{Complex spectrum}
+\begin{itemize}
+\item $\Phi(z)=\sum_{\tau =-\infty}^{+\infty} \omega(\tau)z^{-\tau}$
+\item $\Gamma(\omega)=\Phi(e^{j\omega})$
+\end{itemize}
+\paragraph{Fundamental theorem of spectral analysis}
+\begin{itemize}
+\item $\Gamma_{\text{out}}(\omega)=|W(e^{j\omega})|^2 \cdot \Gamma_{\text{in}}(\omega)$
+\item $\Phi_{\text{out}}(z)=W(z)W(z^{-1}) \cdot \Phi_{\text{in}}(z)$
+\end{itemize}
+\section{Moving Average MA(n)}
+\begin{itemize}
+\item $W(z)=\frac{c_0z^n+c_1z^{n-1}+...+c_n}{z_n}$
+\item $m=0$
+\item $\gamma(\tau)= 
+\begin{cases}
+(c_0c_\tau+c_1c_{1+\tau}+...+c_{n-\tau}c_\tau)\lambda^2	&	|\tau|\leq n\\
+0	& \text{otherwise}
+\end{cases}$
+\end{itemize}
+\subsection{MA($\infty$)}
+\begin{itemize}
+\item $\gamma(0)=(c_0^2+c_1^2+...+c_k^2+...)\lambda^2$
+\item $\gamma(0)$ must converge to a finite value
+\end{itemize}
+\section{Auto Regressive AR(n)}
+\begin{itemize}
+\item $m=0$
+\item $W(z)=\frac{z^n}{z^n-a_1z_{n-1}-...-a_n}$
+\item Covariance calculated by its definition
+\end{itemize}
+
+\section{Known predictors}
+\begin{description}
+\item[AR(1)] $\hat{v}(t|t-r)=a^rv(t-r)$
+\item[MA(1)] $\hat{v}(t|t-1)=v(t-1)-c\hat{v}(t-1|t-2)$
+\item[MA(n)] $\hat{v}(t|t-\textbf{k})=0 \quad \forall k>n$
+\item[ARMA($n_a,n_b$)] $\hat{v}(t|t-1)=
+\frac{C(z)-A(z)}{C(z)}v(t)$
+\item[ARMAX($n_a,n_b$)] $\hat{y}(t|t-1)=
+\frac{C(z)-A(z)}{C(z)}y(t)
++\frac{B(z)}{C(z)}u(t-1)$
+\end{description}
 \end{document}
