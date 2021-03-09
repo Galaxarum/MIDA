@@ -2,6 +2,7 @@
 \usepackage[fleqn]{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
 
 \usepackage{tikz}
 \usetikzlibrary{arrows}
@@ -39,7 +40,7 @@ $\begin{vmatrix}
 \paragraph{Covariance coefficient}
 	$\delta[i,j]=\frac{Var[i,j]}{\sqrt{Var[i]}\sqrt{Var[j]}}$\\
 	$\delta[i,j]=0 \implies$ i, j uncorrelated\\
-	$\left|\delta[i,j]\right|=1 \implies i=\alpha j$
+	$\\abs{\delta[i,j]}=1 \implies i=\alpha j$
 	
 \subsection{Random processes} $v(t,s) |$ t time instant, s expetiment outcome (generally given)
 
@@ -50,7 +51,7 @@ $\lambda^2 (t)=Var[v(t)]$
 $\gamma(t_1,t_2)=E[(v(t_1)-m(t_1))(v(t_2)-m(t_2))]=\gamma(t_2,t_1)$
 \paragraph{Normalized Covariance Function}
 $\rho(\tau)=\frac{\gamma(\tau)}{\gamma(0)}$\\
-$\forall$ stationary processes: $|\rho(\tau)|\leq1	\quad\forall\tau$
+$\forall$ stationary processes: $\abs{\rho(\tau)}\leq1	\quad\forall\tau$
 
 \subsection{Important process classes}
 
@@ -60,7 +61,7 @@ $\forall$ stationary processes: $|\rho(\tau)|\leq1	\quad\forall\tau$
 	\item $\lambda^2 (t)=\lambda^2$ constant
 	\item $\gamma(t_1,t_2)=f(t_2-t_1)=\gamma(\tau)$ covariance depends only on time difference $\tau$
 \end{itemize}
-$|\gamma(\tau)|\leq\gamma(0)		\quad\forall\tau$
+$\abs{\gamma(\tau)}\leq\gamma(0)		\quad\forall\tau$
 \paragraph{White noise} $\eta(t)\sim WN(m,\lambda^2)$
 \begin{itemize}
 	\item Stationary process
@@ -77,7 +78,7 @@ v(t)\sim WN(\beta,\alpha^2 \lambda^2)$
 \paragraph{Spectrum} \[
 \Gamma(\omega)=\overbrace{F(\gamma(\tau))}^\text{Fourier transform}=\sum_{\tau=-\infty}^{+\infty}\gamma(\tau)\cdot e^{-j\omega\tau}
 \]
-\paragraph{Euler formula} $\Gamma(\omega)=\gamma(0)+2cos(\omega)\gamma(1)+2cos(2\omega)\gamma(2)+...$
+\paragraph{Euler formula} $\Gamma(\omega)=\gamma(0)+2cos(\omega)\gamma(1)+2cos(2\omega)\gamma(2)+\dots$
 \paragraph{Spectrum properties} 
 \begin{itemize}
 	\item $\Gamma: \R \to \R$
@@ -113,7 +114,7 @@ $\eta(t) \sim WN(0,\lambda^2) \quad\implies\quad \Gamma_\eta(\omega)=\gamma(0)=V
 \end{tikzpicture}
 
 \begin{alignat*}{2}
-	\Gamma_{yy}(\omega)&=|W(e^{j\omega})|^2 & \cdot \Gamma_{uu}(\omega)\\
+	\Gamma_{yy}(\omega)&=\abs{W(e^{j\omega})}^2 & \cdot \Gamma_{uu}(\omega)\\
 	\Phi_{yy}(z)&=W(z)W(z^{-1})				& \cdot \Phi_{uu}(z)
 \end{alignat*}
 
@@ -175,20 +176,20 @@ Given $\eta(t) \sim WN(0,\lambda^2)$
 
 \paragraph{Model}
 \begin{align*}
-v(t)&=c_0\eta(t)+c_1\eta(t-1)+...+c_n\eta(t-n)\\
-&=(c_0+c_1z^{-1}+...+c_nz^{-n})\eta(t)
+v(t)&=c_0\eta(t)+c_1\eta(t-1)+\dots+c_n\eta(t-n)\\
+&=(c_0+c_1z^{-1}+\dots+c_nz^{-n})\eta(t)
 \end{align*}
 
 \paragraph{Transfer function}
 \[W(z)
-=c_0+c_1z^{-1}+...+c_nz^{-n}
-=\frac{c_0z^n+c_1z^{n-1}+...+c_n}{z^n}
+=c_0+c_1z^{-1}+\dots+c_nz^{-n}
+=\frac{c_0z^n+c_1z^{n-1}+\dots+c_n}{z^n}
 \]\\
 All poles are in the complex origin
 
 \paragraph{Mean}
 \begin{alignat*}{2}
-E[v(t)]&=(c_0+c_1+...+c_n)\underbrace{E[\eta(t)]}_0\\
+E[v(t)]&=(c_0+c_1+\dots+c_n)\underbrace{E[\eta(t)]}_0\\
 \Aboxed{E[v(t)&=0}
 \end{alignat*}
 
@@ -197,17 +198,17 @@ E[v(t)]&=(c_0+c_1+...+c_n)\underbrace{E[\eta(t)]}_0\\
 \boxed{
 \gamma(\tau)=
 \begin{cases}
-\lambda^2\cdot \sum_{i=0}^{n-\tau} c_ic_{i-\tau}	&	|\tau|\leq n\\
+\lambda^2\cdot \sum_{i=0}^{n-\tau} c_ic_{i-\tau}	&	\abs{\tau}\leq n\\
 0	& \text{otherwise}
 \end{cases}
 }
 \]
 \subparagraph{example}
 \begin{align*}
-\gamma(0)&=(c_0^2+c_1^2+...+c_n^2)\lambda^2\\
-\gamma(1)&=(c_0c_1+c_1c_2+...+c_{n-1}c_n)\lambda^2\\
-\gamma(2)&=(c_0c_2+c_1c_3+...+c_{n-2}c_n)\lambda^2\\
-&...\\
+\gamma(0)&=(c_0^2+c_1^2+\dots+c_n^2)\lambda^2\\
+\gamma(1)&=(c_0c_1+c_1c_2+\dots+c_{n-1}c_n)\lambda^2\\
+\gamma(2)&=(c_0c_2+c_1c_3+\dots+c_{n-2}c_n)\lambda^2\\
+&\dots\\
 \lambda(n)&=(c_0c_n)\lambda^2\\
 \lambda(k)&=0\:\forall k>n
 \end{align*}
@@ -215,16 +216,16 @@ E[v(t)]&=(c_0+c_1+...+c_n)\underbrace{E[\eta(t)]}_0\\
 \subsection{MA($\infty$)}
 \paragraph{Model}
 \[
-v(t)=c_0\eta(t)+c_1\eta(t-1)+...+c_k\eta(t-k)+...=\sum_{i=0}^{\infty}c_i\eta(t-i)
+v(t)=c_0\eta(t)+c_1\eta(t-1)+\dots+c_k\eta(t-k)+\dots=\sum_{i=0}^{\infty}c_i\eta(t-i)
 \]
 \paragraph{Variance}
 \[
 \gamma(0)
-=(c_0^2+c_1^2+...+c_k^2+...) \lambda^2
+=(c_0^2+c_1^2+\dots+c_k^2+\dots) \lambda^2
 =\lambda^2 \sum_{i=0}^{\infty} c_i^2
 \]
 \subsection{Well definition of an MA($\infty$)}
-We need to have $|\gamma(\tau)|\leq \gamma(0)$, so we must require that \\
+We need to have $\abs{\gamma(\tau)}\leq \gamma(0)$, so we must require that \\
 $\boxed{ \gamma(0)=\lambda^2 \sum_{i=0}^{\infty} c_i^2 \text{ is finite}}$
 
 \section{Auto Regressive Processes}
@@ -253,7 +254,7 @@ v(t)
 &=\underbrace{a^nv(t-n)}_{\to 0}+ \underbrace{\sum_{i=0}^\infty a^i\eta(t-i)}_{\text{MA($\infty$)}}
 \end{align*}
 In particular, the result depends on an $MA(\infty)$ having $\sum_{i=0}^{\infty} c_i = \sum_{i=0}^{\infty} a^i$.\\
-To check if the variance is finite we check $\gamma(0)=\lambda^2 \sum_{i=0}^{\infty} a^{2i}<\infty$. The given is a geometric series, convergent for $|a|<1$. Under this hypothesis its value is
+To check if the variance is finite we check $\gamma(0)=\lambda^2 \sum_{i=0}^{\infty} a^{2i}<\infty$. The given is a geometric series, convergent for $\abs{a}<1$. Under this hypothesis its value is
 \[
 \gamma(0)=\lambda^2 \sum_{i=0}^{\infty} a^{2i}=\frac{\lambda^2}{1-a^2}
 \] 
@@ -262,21 +263,21 @@ Applying the formula of the variance of MA processes we get\\
  
  \begin{alignat*}{7}
 \gamma(1)
-	&=(c_0c_1+c_1c_2+...)\lambda^2
-	&=(a+aa^2+...)\lambda^2
-	&=a(1+a^2+a^4+...)\lambda^2
+	&=(c_0c_1+c_1c_2+\dots)\lambda^2
+	&=(a+aa^2+\dots)\lambda^2
+	&=a(1+a^2+a^4+\dots)\lambda^2
 	&=a\lambda^2\sum_{i=0}^{\infty} a^{2i}
 	&=a\frac{\lambda^2}{1-a^2}
 	&=a\gamma(0)\\
 \gamma(2)
-	&=(c_0c_2+c_1c_3+...)\lambda^2
+	&=(c_0c_2+c_1c_3+\dots)\lambda^2
 	&=(a^2+aa^3+...)\lambda^2
-	&=a^2(1+a^2+a^4+...)\lambda^2
+	&=a^2(1+a^2+a^4+\dots)\lambda^2
 	&=a^2\lambda^2\sum_{i=0}^{\infty} a^{2i}
 	&=a^2\frac{\lambda^2}{1-a^2}
 	&=a^2\gamma(0)\\
 \Aboxed{
-\gamma(\tau)&=a^{|\tau|}\frac{\lambda^2}{1-a^2}
+\gamma(\tau)&=a^{\abs\tau}\frac{\lambda^2}{1-a^2}
 }
 \end{alignat*}
 } 
@@ -311,24 +312,24 @@ v(t)v(t-\tau)&=av(t-1)v(t-\tau)&+&\eta(t)v(t-\tau)\\
 \end{alignat*}
 We can join the two by inductive reasoning, obtaining
 \[\boxed{
-\gamma(\tau)=a^{|\tau|}\frac{\lambda^2}{1-a^2}
+\gamma(\tau)=a^{\abs\tau}\frac{\lambda^2}{1-a^2}
 }\]
 \subparagraph{Long Division} Leads to same result, but is boring
 
 \subsection{AR(n)}
 \paragraph{Model}
 \[
-v(t)=a_1v(t-1)+a_2v(t-2)+...+a_nv(t-n)+\eta(t)
+v(t)=a_1v(t-1)+a_2v(t-2)+\dots+a_nv(t-n)+\eta(t)
 \]
 \paragraph{Transfer function}
 \[
-W(z)=\frac{z^n}{z^n-a_1z_{n-1}-...-a_n}
+W(z)=\frac{z^n}{z^n-a_1z_{n-1}-\dots-a_n}
 \]
 \paragraph{Mean}
 \begin{alignat*}{6}
-E[v(t)]	&=	a_1E[v(t-1])	&+&a_2E[v(t-2)]	&+&...	&+&a_nE[v(t-n)]	&+&\underbrace{E[\eta(t)]}_0\\
-m		&=	a_1m			&+&a_2m			&+&...	&+&a_nm\\
-(1-a_1-a_2-...-a_n)m&=0\\
+E[v(t)]	&=	a_1E[v(t-1])	&+&a_2E[v(t-2)]	&+&\dots	&+&a_nE[v(t-n)]	&+&\underbrace{E[\eta(t)]}_0\\
+m		&=	a_1m			&+&a_2m			&+&\dots	&+&a_nm\\
+(1-a_1-a_2-\dots-a_n)m&=0\\
 \Aboxed{
 E[v(t)]&=0
 }
@@ -337,18 +338,18 @@ E[v(t)]&=0
 \paragraph{Model}
 \[
 v(t)=
-	a_1v(t-1)+...+a_{n_a}v(t-n_a)+
-	c_0\eta(t)+...+c_{n_c}v(t-n_c)
+	a_1v(t-1)+\dots+a_{n_a}v(t-n_a)+
+	c_0\eta(t)+\dots+c_{n_c}v(t-n_c)
 \]
 Can also be espressed as $V(t)=\frac{C(z)}{A(z)}\eta(t)$, where
 \begin{align*}
-C(z)&=c_0+c_1z^{-1}+...+c_{n_c}z^{-n_c}\\
-A(z)&=1-a_1z^{-1}-...-a_{n_a}z^{-n_a}
+C(z)&=c_0+c_1z^{-1}+\dots+c_{n_c}z^{-n_c}\\
+A(z)&=1-a_1z^{-1}-\dots-a_{n_a}z^{-n_a}
 \end{align*}
 Such process is stationary if all the poles of $W(z)$ are inside the unit disk.
 
 \section{Prediction problem}
-We want to predict $v(t+r)$ from $v(t), v(t-1), ...$, where $r$ is called prediction horizon, of the following stationary process:
+We want to predict $v(t+r)$ from $v(t), v(t-1), \dots$, where $r$ is called prediction horizon, of the following stationary process:
 
 \tikzstyle{block}=[draw, minimum size=3.5em]
 
@@ -363,18 +364,18 @@ We want to predict $v(t+r)$ from $v(t), v(t-1), ...$, where $r$ is called predic
 \subsection{Fake problem}
 Having a process with transfer function $W(z)$, we can compute it in polynomial form using the long division algorithm
 \[
-W(z)=w_0+w_1z^{-1}+w_2z^{-2}+...
+W(z)=w_0+w_1z^{-1}+w_2z^{-2}+\dots
 \]
 We can calculate
 \[
 v(t+r)=W(z)\eta(t+r)
-= \underbrace{w_0 \eta(t+r)+w_1 \eta(t+r-1)+...+w_{r-1} \eta(t+1)}_{\alpha(t)\textbf{ unpredictable: }\text{future of }\eta\text{ involved}}
-+ \underbrace{w_r \eta(t)+w_{r+1} \eta(t-1)+...}_{\beta(t) \textbf{ predictable}}
+= \underbrace{w_0 \eta(t+r)+w_1 \eta(t+r-1)+\dots+w_{r-1} \eta(t+1)}_{\alpha(t)\textbf{ unpredictable: }\text{future of }\eta\text{ involved}}
++ \underbrace{w_r \eta(t)+w_{r+1} \eta(t-1)+\dots}_{\beta(t) \textbf{ predictable}}
 \]
 The optimal fake predictor is then
 \[
 \boxed{
-v(t+r|t)=w_r \eta(t)+w_{r+1}\eta(t-1)+...
+v(t+r|t)=w_r \eta(t)+w_{r+1}\eta(t-1)+\dots
 }=\beta(t)
 \]
 And the prediction error is
@@ -385,12 +386,12 @@ And the prediction error is
 \end{align*}
 \[
 \boxed{
-\epsilon(t)=w_0 \eta(t+r)+w_1 \eta(t+r-1)+...+w_{r-1} \eta(t+1)
+\epsilon(t)=w_0 \eta(t+r)+w_1 \eta(t+r-1)+\dots+w_{r-1} \eta(t+1)
 }
 \]
 \[
 \boxed{
-Var[\epsilon(t)]=(w_0^2+w_1^2+...+w_{r-1}^2)\lambda^2
+Var[\epsilon(t)]=(w_0^2+w_1^2+\dots+w_{r-1}^2)\lambda^2
 }
 \]
 \subsection{True Problem}
@@ -409,7 +410,7 @@ For ARMA processes a shortcut exists:
 An exogenous variable is a \underline{deterministic} input variable in the system
 \subsubsection{ARX model}
 \begin{align*}
-v(t)&=a_1v(t-1)+...+a_{n_a}v(t-n_a)+b_1u(t-1)+...+b_{n_b}u(t-n_b)+\eta(t)
+v(t)&=a_1v(t-1)+\dots+a_{n_a}v(t-n_a)+b_1u(t-1)+\dots+b_{n_b}u(t-n_b)+\eta(t)
 A(z)v(t)&=B(z)u(t-1)+\eta(t)
 \end{align*}
 \paragraph{Transfer functions from u and $\eta$}
@@ -439,16 +440,16 @@ Steps:
 \item \textbf{Family selection:} choose a family of models $M(\theta)$
 	\begin{description}
 	\item[MA(1)] $\theta=[a]$
-	\item[MA(n)] $\theta=[a_1,...,a_n]$
-	\item[ARMA($n_a,n_c$)] $\theta=[a_1,...,a_{n_a},
-	c_1,...,c_{n_c}]$
-	\item[...]
+	\item[MA(n)] $\theta=[a_1,\dots,a_n]$
+	\item[ARMA($n_a,n_c$)] $\theta=[a_1,\dots,a_{n_a},
+	c_1,\dots,c_{n_c}]$
+	\item[\dots]
 	\end{description}
 \item \textbf{Select an optimization criterion}
 	\begin{description}
 	\item[Mean Squared error] $J(\theta)=\frac{1}{N}\sum_{t=1}^N \epsilon_\theta(t)^2$
-	\item[Mean absolute error] $J(\theta)=\frac{1}{N}\sum_{t=1}^N |\epsilon_\theta(t)|$
-	\item[...]
+	\item[Mean absolute error] $J(\theta)=\frac{1}{N}\sum_{t=1}^N \abs{\epsilon_\theta(t)}$
+	\item[\dots]
 	\end{description}
 \item  \textbf{Optimization} find $\hat{\theta}=argmin\,J(\theta)\implies \frac{dJ(\theta)}{d\theta}=0$
 \item \textbf{Validation} verify if the result satisfies the requirements
@@ -475,7 +476,7 @@ $\begin{vmatrix}
 	\item $m$ constant
 	\item $\lambda^2$ constant
 	\item covariance $\gamma(\tau)$ depends only on time difference
-	\item $|\gamma(\tau)|\leq\gamma(0)		\quad\forall\tau$
+	\item $\abs{\gamma(\tau)}\leq\gamma(0)		\quad\forall\tau$
 \end{itemize}
 \paragraph{White noise} $\eta(t)\sim WN(m,\lambda^2)$
 \begin{itemize}
@@ -493,7 +494,7 @@ $\begin{vmatrix}
 \section{Spectral analysis}
 \paragraph{Spectrum}
 \begin{itemize}
-\item $\Gamma(\omega)=\gamma(0)+2cos(\omega)\gamma(1)+2cos(2\omega)\gamma(2)+...$
+\item $\Gamma(\omega)=\gamma(0)+2cos(\omega)\gamma(1)+2cos(2\omega)\gamma(2)+\dots$
 \item Periodic $T=2\pi$
 \item Even
 \item $\Gamma_\eta(\omega)=\gamma_\eta(0)=\lambda^2$
@@ -505,28 +506,28 @@ $\begin{vmatrix}
 \end{itemize}
 \paragraph{Fundamental theorem of spectral analysis}
 \begin{itemize}
-\item $\Gamma_{\text{out}}(\omega)=|W(e^{j\omega})|^2 \cdot \Gamma_{\text{in}}(\omega)$
+\item $\Gamma_{\text{out}}(\omega)=\abs{W(e^{j\omega})}^2 \cdot \Gamma_{\text{in}}(\omega)$
 \item $\Phi_{\text{out}}(z)=W(z)W(z^{-1}) \cdot \Phi_{\text{in}}(z)$
 \end{itemize}
 \section{Moving Average MA(n)}
 \begin{itemize}
-\item $W(z)=\frac{c_0z^n+c_1z^{n-1}+...+c_n}{z_n}$
+\item $W(z)=\frac{c_0z^n+c_1z^{n-1}+\dots+c_n}{z_n}$
 \item $m=0$
 \item $\gamma(\tau)= 
 \begin{cases}
-(c_0c_\tau+c_1c_{1+\tau}+...+c_{n-\tau}c_\tau)\lambda^2	&	|\tau|\leq n\\
+(c_0c_\tau+c_1c_{1+\tau}+\dots+c_{n-\tau}c_\tau)\lambda^2	&	\abs{\tau}\leq n\\
 0	& \text{otherwise}
 \end{cases}$
 \end{itemize}
 \subsection{MA($\infty$)}
 \begin{itemize}
-\item $\gamma(0)=(c_0^2+c_1^2+...+c_k^2+...)\lambda^2$
+\item $\gamma(0)=(c_0^2+c_1^2+\dots+c_k^2+\dots)\lambda^2$
 \item $\gamma(0)$ must converge to a finite value
 \end{itemize}
 \section{Auto Regressive AR(n)}
 \begin{itemize}
 \item $m=0$
-\item $W(z)=\frac{z^n}{z^n-a_1z_{n-1}-...-a_n}$
+\item $W(z)=\frac{z^n}{z^n-a_1z_{n-1}-\dots-a_n}$
 \item Covariance calculated by its definition
 \end{itemize}
 
