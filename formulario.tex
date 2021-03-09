@@ -455,6 +455,112 @@ Steps:
 \item \textbf{Validation} verify if the result satisfies the requirements
 \end{enumerate}
 
+\subsection{Least Square Error}
+Consider the ARX model:
+\[
+y(t)=
+a_1(t-1)+\dots+a_{n_a}y(t-n_a)+
+b_1u(t-1)+\dots+b_{n_b}u(t-n_b)
++\xi(t)
+=
+\theta^T\phi(t)+\eta(t)
+\]
+where $\theta=(a_1,\dots,a_{n_a},b_1,\dots,b_{n_b})$ and $\phi(t)=y(t-1),\dots,y(t-n_a),u(t-1),\dots,u(t-n_b)$ We then use the MSE as optimization criterion and impose its detivative to 0, obtaining the normal equations:
+\[
+\sum_{t=1}^N \phi(t)\phi^T(t)\theta
+=
+\sum_{t=1}^N y(t)\phi^T(t)
+\implies
+\hat{\theta}=
+\left[
+\sum_{t=1}^N \phi(t)\phi^T(t)
+\right]^{-1}
+\cdot
+\sum_{t=1}^N y(t)\phi^T(t)
+\]
+\paragraph{Toepliz matrix} 
+$
+R_{uu}=
+\begin{vmatrix}
+\gamma(0) & \gamma(1) & \gamma(2) & \dots\\
+\gamma(1) & \gamma(2) & \dots\\
+\gamma(2) & \dots\\
+\dots\\
+\end{vmatrix}
+$ 
+If $R_{uu}$ is invertible, then the normal equations will have a unique solution.
+\subsection{Estimation of mean, variance, spectrum}
+Given the data $y_1,\dots,y_N$, we want to calculate an estimator $\hat{\bullet}_N$ (or $\hat{\bullet}$) from the data 
+\subsubsection{Mean} 
+\[
+\hat{m}_n=\frac{1}{N}\sum_{i=1}^N y_i
+\]
+\begin{description}
+\item[Correct] $E[\hat{m}_N]=m \quad \forall N$
+\item[Consistent] $N \to \infty \implies Var[\hat{m}_s] \to 0$
+\end{description}
+\subsubsection{Covariance (a)}
+\[
+\hat{\gamma}_N^a(\tau)=
+\frac{1}{N} \sum_{i=1}^{N-\abs{\tau}} y_i y_{i+\abs\tau}
+\]
+\begin{description}
+\item[Has positive semi-definite Toeplitz matrix]
+\item[Asymptotically correct] $N \to \infty \implies E[\hat{\gamma}_N^a(\tau)] \to \gamma(\tau)$
+\end{description}
+\subsubsection{Covariance (b)}
+\[
+\hat{\gamma}_N^a(\tau)=
+\frac{1}{N-\abs\tau} \sum_{i=1}^{N-\abs{\tau}} y_i y_{i+\abs\tau}
+\]
+\begin{description}
+\item[Correct] $E[\hat{\gamma}^b_N]=m \quad \forall N$
+\end{description}
+\subsubsection{Spectrum}
+\[
+\hat{\Gamma}(\omega_k)=
+\sum_{\tau=1-N}^{N-1} \hat{\gamma}_N(\tau)e^{-j\omega_k \tau}
+\]
+\begin{description}
+\item[Asymptotically correct] $N \to \infty \implies E[\hat{\Gamma}(\omega)] \to \Gamma(\omega)$
+\item[Not correct] $N \to \infty \implies Var[\hat{\Gamma}(\omega)] \to \Gamma(\omega)^2$
+\end{description}
+\paragraph{Barlett method} Given $N$ data (with $N$ large) divide it into $r$ subsets of size $\hat{N}=\frac{N}{r}$ where $N>>r$. Compute the single spectra:
+\[
+\hat{\Gamma}_{\hat{N}}^{(i)} (\omega) \forall i=1,...,r
+\]
+and the average:
+\[
+\overline{\hat{\Gamma}}(\omega)=
+\frac{1}{r} \sum_{i=1}^r \hat{\Gamma}_{\hat{N}}^{(i)}(\omega)
+\]
+As $N>>r$, data from different series can be assumed uncorrelated. We can then consider
+\[
+Var \left[\overline{\hat{\Gamma}}(\omega)\right]
+\approx
+\frac{1}{r} \Gamma^2(\omega) << \Gamma^2(\omega)
+\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \newpage
 \appendix
 \part{Cheatsheet}
