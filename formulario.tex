@@ -1,6 +1,8 @@
 \documentclass{article}
 \usepackage[fleqn]{amsmath}
-\usepackage{amssymb}
+\DeclareMathOperator{\imp}{impulse(0)}
+
+\usepackage{amssymb,cancel}
 \usepackage{mathtools}
 
 \usepackage{tikz}
@@ -456,6 +458,327 @@ Steps:
 
 \newpage
 \appendix
+
+\newpage
+\part{Black-Box non-parametric I/O systems}
+\section{State-space models}
+\begin{center}
+\begin{tikzpicture}[node distance=5em,auto,>=latex']
+    \node [block] (sys) {system};
+    \node (u) [left of=sys, coordinate] {};
+    \node (y) [right of=sys,coordinate]{};
+    \node (d) [above of=sys,coordinate]{};
+    \path[->]
+    		(u) edge node{$u(t)$} (sys)
+    		(sys) edge node{$y(t)$} (y)
+    		(d) edge[dotted] node{$d(t)$} (sys);
+\end{tikzpicture}
+\end{center}
+\paragraph{Known (measured) data}
+\begin{align*}
+&\{u(1),\dots,u(N)\}&\text{input}\\
+&\{y(1),\dots,y(N)\}&\text{output}\\
+\end{align*}
+\subsection{State-space representation}
+\[
+\begin{cases}
+x(t+1)=Fx(t)+Gu(t)&\quad\text{state equations}\\
+y(t)=Hx(t)+Du(t)&\quad\text{output equations}
+\end{cases}
+\]
+Where $F_{n\times n}$, $G_{n\times 1}$, $H_{1\times n}$ and $D_{1\times 1}$ are matrices.
+\paragraph{S.S. representation is not unique} Given any invertible matrix $T$, let $F_1=TFT^{-1}$, $G_1=TG$, $H_1=HT^{-1}$, $D_1=D$. Then the system $\{F,G,H,D\}$ is equivalent to the system $\{F_1,G_1,H_1,D_1\}$.
+\subsection{Transfer function representation}
+\[
+W(z)
+=
+\frac{B(z)}{A(z)}z^{-k}
+=
+\frac{
+	b_0+b_1z^{-1}+\dots+b_pz^{-p}
+}{
+	a_0+a_1z^{-1}+\dots+a_nz^{-n}
+}z^{-k}
+\]
+$W(z)$ is a rational function of the $z$ operator $\rightarrow$ is a digital filter
+\paragraph{Infinite impulse response} 
+$W(z)=
+\frac{
+	z^{-1}
+}{
+	1+\frac{1}{3}z^{-1}
+}$
+\paragraph{Finite impulse response}
+$
+W(z)=z^{-1}+\frac{1}{2}z^{-2}+\frac{1}{4}z^{-3}
+$
+
+\subsection{Convolution of the input with the inpulse response}
+Let's call $\omega(1), \omega(2), \dots$ the values of $y(t)$ when $u(t)=\imp$, and let's measure the values of $y$ at different times: . Then it can be proven that for any $u(t)$
+\[
+y(t)=\sum_{k=0}^\infty \omega(k)u(t-k)
+\]
+
+\section{Converting representations one to another}
+\subsection{State space to Transfer function}
+Consider a strictly propter system:
+\[
+\begin{cases}
+x(t+1)=Fx(t)+Gu(t)\\
+y(t+1)=Hx(t)+\cancelto{0}{Du(t)}
+\end{cases}
+\Rightarrow
+\begin{cases}
+x(t+1)=Fx(t)+Gu(t)\\
+y(t)=Hx(t)
+\end{cases}
+\]
+Applying the $z$ operator we get
+\begin{align*}
+zx(t)&=Fx(t)+Gu(t)\\
+x(t)(zI-F)&=Gu(t)\\
+x(t)&=(zI-F)^{-1}Gu(t)\\
+y(t)&=H(zI-F)^{-1}Gu(t)
+\end{align*}
+And we can extract the transfer function:
+\[
+W(z)=H(zI-F)^{-1}G
+\]
+
+\subsection{Transfer Function to State Space}
+We have the transfer function
+\[
+W(z)=\frac{b_0z^{n-1}+b_1z^{n-2}+\dots+b_{n-1}}{z^n+a_0z^{n-1}+\dots+a_n}
+\]
+The formulas for the state space matrices is
+\[
+F=
+\begin{bmatrix}
+0&1&0&\dots&0\\
+0&0&1&\ddots&\vdots\\
+\vdots&\vdots&\ddots&\ddots&0\\
+0&0&\dots&0&1\\
+-a_n&-a_{n-1}&\dots&\dots&-a_1
+\end{bmatrix}
+\quad
+G=\begin{bmatrix}
+0\\0\\\vdots\\0\\1
+\end{bmatrix}
+\quad
+H=\begin{bmatrix}
+b_{n-1}&b_{n-2}&\dots&b_0
+\end{bmatrix}
+\quad
+D=0
+\]
+
+\subsection{Transfer function to Impulse response}
+Obtained by computing the $\infty$ long division of $W(z)$
+
+\subsection{Impulse response to Tranfer function}
+\paragraph{Z-transform} Given a discrete-time signal $s(t)$ such that $\forall t<0:s(t)=0$, it's Z-transform is
+\[
+\mathcal{Z}=\sum_{t=0}^\infty s(t)z^{-t}
+\]
+It can be proven that:
+\[
+W(z)=\mathcal{Z}(\omega(t))=\sum_{t=0}^\infty \omega(t)z^{-1}
+\]
+NB: this works only in theory because of the infinite sum
+
+\subsection{State space to Impulse response}
+Consider the state space model:
+\[
+\begin{cases}
+x(t+1)=Fx(t)+Gu(t)\\
+y(t)=Hx(t)
+\end{cases}
+\]
+We have that:
+\begin{align*}
+x(1)&=\cancelto{0}{Fx(0)}+Gu(0)&=Gu(0)\\
+y(1)&=Hx(1)&=HGu(0)\\
+\\
+x(2)&=Fx(1)+Gu(1)&=FGu(0)+Gu(1)\\
+y(2)&=Hx(2)&=HFGu(0)+HG(u1)\\
+\\
+x(3)&=Fx(2)+Gu(2)&=F^2Gu(0)+FGu(1)+Gu(2)\\
+y(3)&=Hx(3)&=HF^2Gu(0)+HFGu(1)+HGu(2)\\
+\vdots
+\end{align*}
+\[
+y(t)=0u(t)+HGu(t-1)+HFGu(t-2)+HF^2Gu(t-3)+\dots
+\]
+The IR is:
+\[
+\omega(t)=
+\begin{cases}
+0 & \text{if } t=0\\
+HF^{t-1}G & \text{if } t>0
+\end{cases}
+\]
+
+
+\section{Controllability and Observability}
+\[
+\begin{cases}
+x(t+1)=Fx(t)+Gu(t)\\
+y(t)=Hx(t)
+\end{cases}
+\]
+\paragraph{Fully observable system} The system is fully observable (from the output) $\iff$ the observability matrix is full rank:
+\[
+O=\begin{bmatrix}
+H\\HF\\\vdots\\HF^{n-1}
+\end{bmatrix}
+\qquad
+rank(O)=n
+\]
+\paragraph{Fully controllable system} The system is fully controllable (from the input) $\iff$ the controllability (also called reachability) matrix is full rank:
+\[
+R=\begin{bmatrix}
+G&FG&\dots&F^{n-1}G
+\end{bmatrix}
+\qquad
+rank(R)=n
+\]
+
+\section{Hankel Matrix}
+Starting from $\omega(1),\omega(2),\dots,\omega(N)$ where $N\geq 2n-1$, we can build the Hankel Matrix of order $n$:
+\[
+H_n=\begin{bmatrix}
+\omega(1)&\omega(2)&\omega(3)&\dots&\omega(n)\\
+\omega(2)&\omega(3)&\omega(4)&\dots&\omega(n+1)\\
+\omega(3)&\omega(4)&\omega(5)&\dots&\omega(n+2)\\
+\vdots&\vdots&\vdots&\ddots&\vdots\\
+\omega(n)&\omega(n+1)&\omega(n+2)&\dots&\omega(2n-1)\\
+\end{bmatrix}
+\]
+Knowing that
+\[
+\omega(t)=
+\begin{cases}
+0&\text{if }t=0\\
+HF^{t-1}G&\text{if }t>0
+\end{cases}
+\]
+We can rewrite
+\[
+H_n=
+\begin{bmatrix}
+HG&HFG&HF^2G&\dots&HF^{n-1}G\\
+\vdots&\ddots&&&\vdots\\
+\vdots&&\ddots&&\vdots\\
+\vdots&&&\ddots&\vdots\\
+HF^{n-1}G&\dots&\dots&\dots&HF^{2n-2}G
+\end{bmatrix}
+=
+\begin{bmatrix}
+H\\HF\\\vdots\\HF^{n-1}
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+G&FG&\dots&F^{n-1}G
+\end{bmatrix}
+=
+O\cdot R
+\]
+
+\section{Subspace-based State Space System Identification}
+\paragraph{Impulse experiment} Measure $y(t)$ under the input $u(t)=\imp (0)$\\
+How to derive $F,G,H$ from $\omega(0),\dots,\omega(n)$?
+\begin{itemize}
+\item Assuming the IR measurement to be noise free $\rightarrow$ easier, not realistic
+\item Measure $\hat{\omega(t)}$ as a noisy signal and compute $\omega(t)=\eta(t)-\hat{\omega}(t)$
+\end{itemize}
+
+\subsection{Obtain $F,G,H$ from a noise-free IR}
+\begin{enumerate}
+\item
+	Build the Hankel matrix of increasing order, and conpute the rank until $rank(H_n)=rank(H_{n+1})$. Then, $n$ is the order of the IR
+	\[
+	H_1=\begin{bmatrix}
+	\omega(1)
+	\end{bmatrix}
+	\quad
+	H_2=\begin{bmatrix}
+	\omega(1)&\omega(2)\\
+	\omega(2)&\omega(3)
+	\end{bmatrix}
+	\quad
+	H_3=\dots
+	\quad
+	\dots
+	\quad
+	H_n=\dots
+	\]
+\item Take $H_{n+1}$ and factorize it in two rectangular matrix of size $(n+1)\times n$ and $n\times (n+1)$: $H_{n+1}=O_{n+1}\cdot R_{n+1}$, where
+	\[
+	O_{n+1}=\begin{bmatrix}
+	H\\HF\\\vdots\\HF^n
+	\end{bmatrix}
+	\qquad
+	R_{n+1}=\begin{bmatrix}
+	G&FG&\dots&F^nG
+	\end{bmatrix}
+	\]
+\item Estimate H,F,G:
+	\begin{itemize}
+	\item Extract F and G from the first element of O and R
+	\item Define:
+	\[
+	O_1=\begin{bmatrix}
+	H\\HF\\\vdots\\HF^{n-1}
+	\end{bmatrix}
+	\qquad
+	O_2=\begin{bmatrix}
+	HF\\\vdots\\HF^n
+	\end{bmatrix}\\
+	\]
+	\item Observe that $O_1F=O_2$, so $F=O_1^{-1}O_2$
+	\end{itemize}	
+\end{enumerate}
+
+\section{Obtain $F,G,H$ from a noisy IR}
+The measurement is of $\hat{\omega}(t)=\omega(t)+\eta(t)$. To identify the process:
+\begin{enumerate}
+\item Build the Hankel matrix from data using all the $N$ data available in one shot:
+\[
+\hat{H}_{q \times d}=
+\begin{bmatrix}
+\hat{\omega}(1)&\hat{\omega}(2)&\dots&\hat{\omega}(d)\\
+\hat{\omega}(2)&\hat{\omega}(3)&\dots&\hat{\omega}(d+1)\\
+\vdots&\vdots&\ddots&\vdots\\
+\hat{\omega}(q)&\hat{\omega}(q+1)&\dots&\hat{\omega}(q+d+1)\\
+\end{bmatrix}
+\]
+Where $q+d+1=N$
+\item Calculate the Singular Value Decomposition of $\hat{H}_{q \times d}$:
+\[
+\hat{H}_{q \times d}=\hat{U}_{q \times q} \cdot \hat{S}_{q \times d} \cdot \hat{V}^T_{d \times d}
+\]
+$\hat{U}$ and $\hat{V}$ are unitary matrices: they are invertible and their inverses are equal to their transpose.
+\[
+\hat{S}=\begin{bmatrix}
+\sigma_1\\
+&\sigma_2\\
+&&\ddots\\
+&&&\sigma_d
+\end{bmatrix}
+\]
+\item Plot the singular values ($\sigma_i$)and cut-off the three matrices:
+	\begin{itemize}
+	\item Ideally, after a certain $n$ (the order of the IR) there would be a jump dividing the signal (before) from the noise (after)
+	\item In reality no clear distinction exists, but it's possible to identify an interval of possible values of $n$. A tradeoff between complexity, precision and oferfitting takes place
+	\end{itemize}
+\item Split $\hat{U},\hat{S},\hat{V}^T$ obtaining $U_{q \times n}$, $S_{n \times n}$, $V^T_{n \times d}$ and then recreate $H_{qd}=USV^T$
+\item $H$ and $G$ are estimated as for the unnoisy case. To estimate $F$ we can build $O_1$ and $O_2$ as before, but then the system $O_1 \cdot F = O_2$ cannot be solved directly as $O_1$ is not square. We can instead compute the approximate least-square solution of the system:
+\[
+F=(O_1^TO_1)^{-1}O_1^TO_2
+\]
+\end{enumerate}
+
+\newpage
 \part{Cheatsheet}
 \section{Probability Recall}
 \paragraph{Cross-Variance}
