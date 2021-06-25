@@ -5,7 +5,7 @@
 \usepackage{amssymb,cancel}
 \usepackage{mathtools}
 
-\usepackage{tikz}
+\usepackage{tikz,caption}
 \usetikzlibrary{arrows}
 
 \usepackage{titlesec, hyperref}
@@ -777,6 +777,142 @@ $\hat{U}$ and $\hat{V}$ are unitary matrices: they are invertible and their inve
 F=(O_1^TO_1)^{-1}O_1^TO_2
 \]
 \end{enumerate}
+
+\part{Parametric black-box system identification using frequency-domain approach}
+\section{Experiment design and data pre-processing}
+\begin{enumerate}
+\item Select a set of excitation frequencies $\{\omega_1,\dots,\omega_H\}$. Usually $\omega_i-\omega_{i-1}$ is constant $\forall i \in \{2,\dots,H\}$. $\omega_H$ must be selected according to the bandwidth of the system
+\item Make $H$ independent experiments:
+\begin{figure}[h]
+\centering
+\captionsetup{labelformat=empty}
+\begin{tikzpicture}[node distance=15em,auto,>=latex']
+    \node [block] (sys) {system};
+    \node (u) [left of=sys, coordinate] {};
+    \node (y) [right of=sys,coordinate]{};
+    \path[->]
+    		(u) edge node{$u_1(t)=A_1\sin(\omega_1t)$} (sys)
+    		(sys) edge node{$y_1(t)$} (y);
+\end{tikzpicture}
+\caption{Experiment 1}
+\bigskip
+\begin{tikzpicture}[node distance=15em,auto,>=latex']
+    \node [block] (sys) {system};
+    \node (u) [left of=sys, coordinate] {};
+    \node (y) [right of=sys,coordinate]{};
+    \path[->]
+    		(u) edge node{$u_2(t)=A_2\sin(\omega_2t)$} (sys)
+    		(sys) edge node{$y_2(t)$} (y);
+\end{tikzpicture}
+\caption{Experiment 2}
+\caption{\vdots}
+\bigskip
+\begin{tikzpicture}[node distance=15em,auto,>=latex']
+    \node [block] (sys) {system};
+    \node (u) [left of=sys, coordinate] {};
+    \node (y) [right of=sys,coordinate]{};
+    \path[->]
+    		(u) edge node{$u_H(t)=A_H\sin(\omega_Ht)$} (sys)
+    		(sys) edge node{$y_H(t)$} (y);
+\end{tikzpicture}
+\caption{Experiment H}
+\end{figure}
+\item Focusing on experiment $i$, because of noise the real value of the output will be (unknowns are underlined)
+\[
+\hat{y_i}=
+\underline{B_i}\sin(\omega_it+\underline{\phi_i})=
+\underline{a_i}\sin(\omega_it)+\underline{b_i}\cos(\omega_it)
+\]
+Using the second equation (since it is linear in the unknowns). We want to determine
+\[
+\{\hat{a_i},\hat{b_i}\}=\arg\min_{\{a_i,b_i\}} J_N(a_i,b_i)
+\]
+\[
+J_N(a_i,b_i)=\frac{1}{N}\sum_{t=1}^{N} \left( 
+\underbrace{
+	y_i(t)
+}_{
+	\text{measurement}
+}
+\underbrace{
+	-a_i\sin(\omega_it)
+	-b_i\cos(\omega_it)
+}_{
+	\text{model output}
+}
+\right)^2
+\]
+This can be solved explicitly
+\begin{align*}
+\frac{\delta J_N}{\delta a_i}&=
+\frac{2}{N}\sum_{t=1}^N
+\left(-\sin(\omega_it)\right)
+\left(y_i(t)-a_i\sin(\omega_it)-b_i\cos(\omega_it)\right)&=0\\
+\frac{\delta J_N}{\delta b_i}&=
+\frac{2}{N}\sum_{t=1}^N
+\left(-\cos(\omega_it)\right)
+\left(y_i(t)-a_i\sin(\omega_it)-b_i\cos(\omega_it)\right)&=0
+\end{align*}
+Which results in the following linear system:
+\[
+\begin{bmatrix}
+\sum_{t=1}^N \sin(\omega_it)^2
+&
+\sum_{t=1}^N \sin(\omega_it)\cos(\omega_it)
+\\
+\sum_{t=1}^N \sin(\omega_it)\cos(\omega_it)
+&
+\sum_{t=1}^N \cos(\omega_it)^2
+\end{bmatrix}
+\begin{bmatrix}
+a_i\\b_i
+\end{bmatrix}
+=
+\begin{bmatrix}
+\sum_{t=1}^N y_i(t)\sin(\omega_it)
+\\
+\sum_{t=1}^N y_i(t)\cos(\omega_it)
+\end{bmatrix}
+\]
+\item We want to move back to sin-only form:
+\begin{align*}
+\hat{\phi_i}&=\arctan \left(\frac{\hat{b_i}}{\hat{a_i}}\right)\\
+\hat{B_i}&=\frac{\frac{\hat{a_i}}{\cos\hat{\phi_i}}+\frac{\hat{b_i}}{\sin\hat{\phi_i}}}{2}
+\end{align*}
+\item Repeating H experiments we obtain
+\begin{align*}
+\{\hat{B_1},\hat{\phi_1}\} &\Rightarrow \frac{\hat{B_1}}{A_1}e^{j\hat{\phi_1}}\\
+&\vdots\\
+\{\hat{B_H},\hat{\phi_H}\} &\Rightarrow \frac{\hat{B_H}}{A_H}e^{j\hat{\phi_H}}\\
+\end{align*}
+So we have H complex numbers representing the frequency response of $W(z)$. These numbers are our dataset
+\end{enumerate}
+\section{Model class selection}
+\[
+\mathcal{M(\theta)}:
+W(z,\theta)=
+\frac{b_0+b_1z^{-1}+\dots+b_pz^{-p}}{1+a_1z^{-1}+\dots+a_nz^{-n}}
+z^{-1}
+\qquad
+\theta=\begin{bmatrix}
+a_1\\\vdots\\a_n\\b_0\\\vdots\\b_p
+\end{bmatrix}
+\]
+\section{Performance index}
+\[
+J_H(\theta)=
+\frac{1}{H}
+\sum_{i=1}^H
+\left(
+W(e^{j\omega_i},\theta)
+-
+\frac{\hat{B_i}}{A_i}e^{j\hat{\phi_i}}
+\right)^2
+\]
+\section{Optimization}
+\[
+\hat{\theta}=\arg \min_\theta J_H(\theta)
+\]
 
 \newpage
 \part{Cheatsheet}
