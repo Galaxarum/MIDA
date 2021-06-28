@@ -6,7 +6,10 @@
 \usepackage{mathtools}
 
 \usepackage{tikz,caption}
-\usetikzlibrary{arrows}
+\tikzstyle{block}=[draw, minimum size=3.5em]
+\tikzstyle{add}=[circle,draw]
+\tikzstyle{arrow}=[thick,->,>=stealth]
+\usetikzlibrary{shapes.geometric,arrows,positioning}
 
 \usepackage{titlesec, hyperref}
 \newcommand{\sectionbreak}{\clearpage}
@@ -104,12 +107,10 @@ $\eta(t) \sim WN(0,\lambda^2) \quad\implies\quad \Gamma_\eta(\omega)=\gamma(0)=V
 
 \paragraph{Fundamental theorem of Spectral Analysis} allows to derive the (real and/or complex) spectrum of the output from  the input and the transfer function of the system
 
-\tikzstyle{block}=[draw, minimum size=3.5em]
-
 \begin{tikzpicture}[node distance=5em,auto,>=latex']
     \node [block] (W) {$W(z)$};
-    \node (u) [left of=W, coordinate] {};
-    \node [coordinate] (y) [right of=W]{};
+    \node (u) [left=of W, coordinate] {};
+    \node [coordinate] (y) [right=of W]{};
     \path[->] (u) edge node {$u$} (W);
     \path[->] (W) edge node {$y$} (y);
 \end{tikzpicture}
@@ -354,10 +355,10 @@ We want to predict $v(t+r)$ from $v(t), v(t-1), ...$, where $r$ is called predic
 
 \tikzstyle{block}=[draw, minimum size=3.5em]
 
-\begin{tikzpicture}[node distance=5em,auto,>=latex']
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
     \node [block] (W) {$W(z)$};
-    \node (wn) [left of=W, coordinate] {};
-    \node [coordinate] (v) [right of=W]{};
+    \node (wn) [left=of W, coordinate] {};
+    \node [coordinate] (v) [right=of W]{};
     \path[->] (wn) edge node {$\eta$} (W);
     \path[->] (W) edge node {$v$} (v);
 \end{tikzpicture}
@@ -463,15 +464,15 @@ Steps:
 \part{Black-Box non-parametric I/O systems}
 \section{State-space models}
 \begin{center}
-\begin{tikzpicture}[node distance=5em,auto,>=latex']
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
     \node [block] (sys) {system};
-    \node (u) [left of=sys, coordinate] {};
-    \node (y) [right of=sys,coordinate]{};
-    \node (d) [above of=sys,coordinate]{};
+    \node (u) [left=of sys] {$u(t)$};
+    \node (y) [right=of sys]{$y(t)$};
+    \node (d) [above=of sys]{$d(t)$};
     \path[->]
-    		(u) edge node{$u(t)$} (sys)
-    		(sys) edge node{$y(t)$} (y)
-    		(d) edge[dotted] node{$d(t)$} (sys);
+    		(u) edge (sys)
+    		(sys) edge (y)
+    		(d) edge[dotted] (sys);
 \end{tikzpicture}
 \end{center}
 \paragraph{Known (measured) data}
@@ -786,20 +787,20 @@ F=(O_1^TO_1)^{-1}O_1^TO_2
 \begin{figure}[h]
 \centering
 \captionsetup{labelformat=empty}
-\begin{tikzpicture}[node distance=15em,auto,>=latex']
+\begin{tikzpicture}[node distance=3.5cm,auto,>=latex']
     \node [block] (sys) {system};
-    \node (u) [left of=sys, coordinate] {};
-    \node (y) [right of=sys,coordinate]{};
+    \node (u) [left=of sys, coordinate] {};
+    \node (y) [right=of sys,coordinate]{};
     \path[->]
     		(u) edge node{$u_1(t)=A_1\sin(\omega_1t)$} (sys)
     		(sys) edge node{$y_1(t)$} (y);
 \end{tikzpicture}
 \caption{Experiment 1}
 \bigskip
-\begin{tikzpicture}[node distance=15em,auto,>=latex']
+\begin{tikzpicture}[node distance=3.5cm,auto,>=latex']
     \node [block] (sys) {system};
-    \node (u) [left of=sys, coordinate] {};
-    \node (y) [right of=sys,coordinate]{};
+    \node (u) [left=of sys, coordinate] {};
+    \node (y) [right=of sys,coordinate]{};
     \path[->]
     		(u) edge node{$u_2(t)=A_2\sin(\omega_2t)$} (sys)
     		(sys) edge node{$y_2(t)$} (y);
@@ -807,10 +808,10 @@ F=(O_1^TO_1)^{-1}O_1^TO_2
 \caption{Experiment 2}
 \caption{\vdots}
 \bigskip
-\begin{tikzpicture}[node distance=15em,auto,>=latex']
+\begin{tikzpicture}[node distance=3.5cm,auto,>=latex']
     \node [block] (sys) {system};
-    \node (u) [left of=sys, coordinate] {};
-    \node (y) [right of=sys,coordinate]{};
+    \node (u) [left=of sys, coordinate] {};
+    \node (y) [right=of sys,coordinate]{};
     \path[->]
     		(u) edge node{$u_H(t)=A_H\sin(\omega_Ht)$} (sys)
     		(sys) edge node{$y_H(t)$} (y);
@@ -1227,6 +1228,226 @@ K_1=0\\
 K_2=\frac{3}{2}
 \end{cases}
 \]
+
+\part{Software-sensing with Blabk box Methods}
+\begin{tikzpicture}[node distance=5em,auto,>=latex']
+    \node (u) [] {$u(t)$};
+    \node (ud) [right=of u,coordinate]{};
+    \node [right=of ud,block] (sys) {system};
+    \node (yd) [right of=sys,coordinate]{};
+    \node (y) [right=of yd]{$y(t)$};
+    \node (K) [below=of sys,block]{K};
+    \node (add) [right of=K,add]{};
+    \node (mod) [below=of K,block]{model};
+    \node (ut) [left=of mod,coordinate]{};
+    \node (xd) [right of=mod,coordinate]{};
+    \node (x) [right=of xd]{$\hat{x}(t)$};
+    \path[->]
+    		(ud) edge (sys)
+    		(yd) edge (y)
+    		(yd) edge node[near end]{+}(add) 
+    		(add) edge (K)
+    		(K) edge (mod)
+    		(ut) edge (mod)
+    		(xd) edge node[near end]{-}(add)
+    		(xd) edge (x);
+    	\path[-]
+    		(sys) edge (yd)
+    		(u) edge (ud)
+    		(ud) edge (ut)
+    		(mod) edge (xd);
+\end{tikzpicture}
+\paragraph{Features}
+\begin{itemize}
+\item A white-box model is required
+\item No need of a training dataset
+\item Works by feedback estimation
+\item Constructive method
+\item Can be used to estimate unmeasurable states
+\end{itemize}
+\section{Linear Time Invariant Systems}
+\paragraph{Known white-box model of the system}
+Draw the block diagram of the system and the KF, then (from the diagram) calculate $\hat{x}(t)=f(u(t),y(t))$. Done.
+\paragraph{Unknown model for the system}
+A BB estimation is possible iff all the states are measurable.
+\subparagraph{Dataset}
+\begin{align*}
+\{u(1),\dots,u(N)\}\\
+\{y(1),\dots,y(N)\}\\
+\{x(1),\dots,x(N)\}\\
+\end{align*}
+\subparagraph{Model} to be optimized fot $\theta$
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (u) [] {$u(t)$};
+\node (su) [right=of u,block] {$S_{ux}(z,\theta)$};
+\node (ut) [right=of su,coordinate]{};
+\node (add) [below=of ut,add]{};
+\node (x) [right=of add]{$\hat{x}(t)$};
+\node (yt) [below=of add,coordinate]{};
+\node (sy) [left=of yt,block]{$S_{yx}(z,\theta)$};
+\node (y) [left=of sy]{$y(t)$};
+\path[->]
+	(u) edge (su)
+	(ut) edge (add)
+	(add) edge (x)
+	(y) edge (sy)
+	(yt) edge (add);
+\path[-]
+	(su) edge (ut)
+	(sy) edge (yt);
+\end{tikzpicture}
+\end{figure}
+\subparagraph{Performance index}
+\[
+J_N(\theta)=
+\frac{1}{N}\sum_{t=1}^N \left(
+x(t)-(
+	S_{ux}(z,\theta)u(t)+
+	S_{yx}(z,\theta)y(t)
+	)
+\right)^2
+\]
+\subparagraph{Optimization}
+\[
+\hat{\theta}_N=\arg \min_\theta J_N(\theta)
+\]
+We get $S_{ux}(z,\hat{\theta}_N)$ and $S_{yx}(z,\hat{\theta}_N)$, the transfer functions for our software sensors
+
+\section{Non-linear systems}
+\begin{tikzpicture}[node distance=5em,auto,>=latex']
+    \node (u) [] {$u(t)$};
+    \node (ud) [right=of u,coordinate]{};
+    \node [right of=ud,block,align=center] (sys) {non-linear\\system};
+    \node (yd) [right of=sys,coordinate]{};
+    \node (y) [right=of yd]{$y(t)$};
+    \node (K) [below=of sys,block,align=center]{non-linear\\function};
+    \node (add) [right of=K,add]{};
+    \node (mod) [below=of K,block,align=center]{non-linear\\ dynamic\\ system};
+    \node (ut) [left of=mod,coordinate]{};
+    \node (xd) [right of=mod,coordinate]{};
+    \node (x) [right=of xd]{$\hat{x}(t)$};
+    \path[->]
+    		(ud) edge (sys)
+    		(yd) edge (y)
+    		(yd) edge node[near end]{+}(add) 
+    		(add) edge (K)
+    		(K) edge (mod)
+    		(ut) edge (mod)
+    		(xd) edge node[near end]{-}(add)
+    		(xd) edge (x);
+    	\path[-]
+    		(sys) edge (yd)
+    		(u) edge (ud)
+    		(ud) edge (ut)
+    		(mod) edge (xd);
+\end{tikzpicture}
+\paragraph{Model}
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (f) [block,align=center] {non-linear\\ dynamic\\ system};
+\node (u) [left =of f] {$u(t)$};
+\node (y) [above =of f] {$y(t)$};
+\node (x) [right =of f]{$\hat{x}(t)$};
+\path[->]
+	(u) edge (f)
+	(y) edge (f)
+	(f) edge (x);
+\end{tikzpicture}
+\end{center}
+
+\subsection{Recurrent neural network}
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (f) [block,align=center] {recurrent\\ Neural\\Network};
+\node (u) [left =of f] {$u(t)$};
+\node (y) [above =of f] {$y(t)$};
+\node (x) [right =of f]{$\hat{x}(t)$};
+\path[->]
+	(u) edge (f)
+	(y) edge (f)
+	(f) edge (x);
+\end{tikzpicture}
+\end{center}
+\subsection{FIR architecture} split the system into a static non-linear system and linear dynamics
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (u) [] {$u(t)$};
+\node (u1) [right =of u, block] {$z^{-1}$};
+\node (u2) [below =.5 of u1, block] {$z^{-1}$};
+\node (u3) [below =of u2, block] {$z^{-1}$};
+\node (y1) [below =1.5 of u3, block] {$z^{-1}$};
+\node (y) [below left = of u3]{$y(t)$};
+\node (y2) [below =.5 of y1, block] {$z^{-1}$};
+\node (y3) [below =of y2, block] {$z^{-1}$};
+\node (sys) [block,right=5 of y,minimum height=15cm,align=center]{non linear \\ static \\ parametric \\ function\\\\(eg: static\\neural\\network)};
+\draw[arrow] (u) -- (u1);
+\draw[arrow] (u1) -- (u2);
+\draw[arrow,dotted] (u2) -- (u3);
+\draw[arrow] (u1) -- node[midway]{$u(t-1)$} (u1-|sys.west);
+\draw[arrow] (u2) -- node[midway]{$u(t-2)$} (u2-|sys.west);
+\draw[arrow] (u3) -- node[midway]{$u(t-n_u)$} (u3-|sys.west);
+\draw[arrow] (y) -| (y1);
+\draw[arrow]	(y) -- (sys);
+\draw[arrow]	(y1) -- (y2);
+\draw[arrow,dotted]	(y2) -- (y3);
+\draw[arrow] (y1) -- node[midway]{$y(t-1)$} (y1-|sys.west);
+\draw[arrow] (y2) -- node[midway]{$y(t-2)$} (y2-|sys.west);
+\draw[arrow] (y3) -- node[midway]{$y(t-n_y)$} (y3-|sys.west);
+\end{tikzpicture}
+\end{center}
+\section{IRR scheme} TODOTODOTODO
+\begin{center}
+%TODO
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (u) [] {$u(t)$};
+\node (u1) [right =of u, block] {$z^{-1}$};
+\node (u2) [below =.5 of u1, block] {$z^{-1}$};
+\node (u3) [below =of u2, block] {$z^{-1}$};
+\node (y1) [below =1.5 of u3, block] {$z^{-1}$};
+\node (y) [below left = of u3]{$y(t)$};
+\node (y2) [below =.5 of y1, block] {$z^{-1}$};
+\node (y3) [below =of y2, block] {$z^{-1}$};
+\node (sys) [block,right=5 of y,minimum height=15cm,align=center]{non linear \\ static \\ parametric \\ function\\\\(eg: static\\neural\\network)};
+\draw[arrow] (u) -- (u1);
+\draw[arrow] (u1) -- (u2);
+\draw[arrow,dotted] (u2) -- (u3);
+\draw[arrow] (u1) -- node[midway]{$u(t-1)$} (u1-|sys.west);
+\draw[arrow] (u2) -- node[midway]{$u(t-2)$} (u2-|sys.west);
+\draw[arrow] (u3) -- node[midway]{$u(t-n_u)$} (u3-|sys.west);
+\draw[arrow] (y) -| (y1);
+\draw[arrow]	(y) -- (sys);
+\draw[arrow]	(y1) -- (y2);
+\draw[arrow,dotted]	(y2) -- (y3);
+\draw[arrow] (y1) -- node[midway]{$y(t-1)$} (y1-|sys.west);
+\draw[arrow] (y2) -- node[midway]{$y(t-2)$} (y2-|sys.west);
+\draw[arrow] (y3) -- node[midway]{$y(t-n_y)$} (y3-|sys.west);
+\end{tikzpicture}
+\end{center}
+\section{Physical regressors}
+Using the physical knowledge of the system, provide a set of regressors (ie: smaller and more meaningful set of signals) elaborated by a static non-linear system
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (b1) [block,minimum height=5cm,align=center]{regressor\\builder};
+\node (u) [above left = of b1.west] {$u(t)$};
+\draw[arrow] (u) -- (u-|b1.west);
+\node (y) [below left=of b1.west]{$y(t)$};
+\draw[arrow] (y)--(y-|b1.west);
+\node (b2) [block,minimum height=5cm,align=center,
+right= 2 of b1]{$f(\cdot,\theta)$};
+\draw[arrow] (b1.60) -- node[midway]{$r_1(t)$} (b1.60-|b2.west);
+\draw[arrow] (b1.40) -- node[midway]{$r_2(t)$} (b1.40-|b2.west);
+\draw[draw=none] (b1.-30) -- node[midway]{$\vdots$} (b1.-30-|b2.west);
+\draw[arrow] (b1.-60) -- node[midway]{$r_h(t)$} (b1.-60-|b2.west);
+
+
+\node(x) [right=of b2]{$\hat{x}(t)$};
+\draw[arrow] (b2.east|-x)--(x);
+
+\end{tikzpicture}
+\end{center}
+
 
 \newpage
 \part{Cheatsheet}
