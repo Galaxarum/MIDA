@@ -15,6 +15,9 @@
 \newcommand{\sectionbreak}{\clearpage}
 \newcommand{\R}{\mathbb{R}}
 
+\let\OldPart\part
+\renewcommand{\part}{\newpage\OldPart}
+
 \title{Model Identification and Data Analysis}
 \author{Matteo Secco}
 
@@ -1397,27 +1400,42 @@ We get $S_{ux}(z,\hat{\theta}_N)$ and $S_{yx}(z,\hat{\theta}_N)$, the transfer f
 \draw[arrow] (y3) -- node[midway]{$y(t-n_y)$} (y3-|sys.west);
 \end{tikzpicture}
 \end{center}
-\section{IRR scheme} TODOTODOTODO
+\section{IRR scheme}
 \begin{center}
-%TODO
 \begin{tikzpicture}[node distance=1cm,auto,>=latex']
-\node (u) [] {$u(t)$};
-\node (u1) [right =of u, block] {$z^{-1}$};
+\node (x) [] {$x(t)$};
+\node (x1) [right=of x,block] {$z^{-1}$};
+\node (x2) [below=.5 of x1,block] {$z^{-1}$};
+\node (x3) [below=of x2,block] {$z^{-1}$};
+
+\node (u1) [below=of x3, block] {$z^{-1}$};
+\node (u) [left=of u1] {$u(t)$};
 \node (u2) [below =.5 of u1, block] {$z^{-1}$};
 \node (u3) [below =of u2, block] {$z^{-1}$};
+
 \node (y1) [below =1.5 of u3, block] {$z^{-1}$};
 \node (y) [below left = of u3]{$y(t)$};
 \node (y2) [below =.5 of y1, block] {$z^{-1}$};
 \node (y3) [below =of y2, block] {$z^{-1}$};
-\node (sys) [block,right=5 of y,minimum height=15cm,align=center]{non linear \\ static \\ parametric \\ function\\\\(eg: static\\neural\\network)};
+
+\node (sys) [block,right=5 of u2,minimum height=20cm,align=center]{non linear \\ static \\ parametric \\ function\\\\(eg: static\\neural\\network)};
+
+\draw[arrow] (x)--(x1.west);
+\draw[arrow] (x1)--(x2);
+\draw[arrow,dotted] (x2)--(x3);
+\draw[arrow] (x1)--node[midway]{$x(t-1)$}(x1-|sys.west);
+\draw[arrow] (x2)--node[midway]{$x(t-2)$}(x2-|sys.west);
+\draw[arrow] (x3) -- node[midway]{$x(t-n_u)$} (x3-|sys.west);
+
 \draw[arrow] (u) -- (u1);
 \draw[arrow] (u1) -- (u2);
 \draw[arrow,dotted] (u2) -- (u3);
 \draw[arrow] (u1) -- node[midway]{$u(t-1)$} (u1-|sys.west);
 \draw[arrow] (u2) -- node[midway]{$u(t-2)$} (u2-|sys.west);
 \draw[arrow] (u3) -- node[midway]{$u(t-n_u)$} (u3-|sys.west);
+
 \draw[arrow] (y) -| (y1);
-\draw[arrow]	(y) -- (sys);
+\draw[arrow]	(y) -- (y-|sys.west);
 \draw[arrow]	(y1) -- (y2);
 \draw[arrow,dotted]	(y2) -- (y3);
 \draw[arrow] (y1) -- node[midway]{$y(t-1)$} (y1-|sys.west);
@@ -1447,6 +1465,116 @@ right= 2 of b1]{$f(\cdot,\theta)$};
 
 \end{tikzpicture}
 \end{center}
+
+\part{Grey-box System Identification}
+\section{Using Kalman Filter}
+\subsection{Problem definition}
+\begin{itemize}
+\item We have a model:
+\[
+S:
+\begin{cases}
+x(t+1)=f(x(t),u(t),\theta)+v_1(t)\\
+y(t)=h(x(t),\theta)+v_2(t)
+\end{cases}
+\]
+\item $f$ and $h$ are functions (linear or not) depending on some unknown parameter $\theta$ carrying physical meaning (mass, resistance,...)
+\item We want to estimate $\hat{\theta}$
+\item This is archieved by managing the unknown parameters as extended states
+\end{itemize}
+\subsection{State extension}
+\[
+S:\begin{cases}
+x(t+1)=f(x(t),u(t),\theta(t))+v_1(t)\\
+\theta(t+1)=\theta(t)+v_\theta(t)\\
+y(t)=h(x(t),\theta(t))+v_2(t)
+\end{cases}
+\]
+And the extended state vector is $x_E=\begin{bmatrix}
+x(t)\\\theta(t)
+\end{bmatrix}
+$\\
+The noise in the equation of $\theta$ is added to prevent the KF form getting stuck on the initial conditions.
+\subsection{Design choice} The choice of the covariance matrix of $v_\theta\sim WN(0,V_\theta)$\\
+\begin{itemize}
+\item Assume $v_1\perp v_\theta$ and $v_2\perp v_\theta$:
+\[
+V_\theta=\begin{bmatrix}
+\lambda_{1\theta}^2\\
+&\lambda_{2\theta}^2\\
+&&\ddots\\
+&&&\lambda_{n_\theta \theta}^2
+\end{bmatrix}_{n_\theta \times n_\theta}
+\]
+\item Usually, it is assumed that $\lambda_{i\theta}=\lambda_{j\theta} \quad \forall i \forall j$
+\item Assume that $v_\theta(t)$ is a set of \underline{independent} $WN$ all with the same variance $\lambda_\theta^2$
+\item Bigger values of $\lambda_\theta^2$ lead to a quicker convergence, but less stable (stronger obscillations around the steady-state)
+\item The selection of $\lambda_\theta^2$ is leaded by application-specific constraints
+\end{itemize}
+\subsection{Applicability} In theory, this trick can work with any number of sensors, states, and parameters. In practice it works well only on a limited number of parameters ($\sim$3 sensors, 5 states, 2 parameters)
+
+\section{Simulation Error Method}
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (u) []{$u(t)$};
+\node (mod) [right=of u,block,align=center]{Model with\\some unknown\\parameters};
+\node (y) [right=of mod]{$y(t)$};
+\draw[arrow] (u)--(mod);
+\draw[arrow] (mod)--(y);
+\end{tikzpicture}
+\end{center}
+\subsection{Dataset} from an experiment, collect:
+\begin{align*}
+\{\overline{u}(1),\overline{u}(2),\dots,\overline{u}(N)\\
+\{\overline{y}(1),\overline{y}(2),\dots,\overline{y}(N)
+\end{align*}
+\subsection{Model}
+\[
+y(t)=\mathcal{M}(u(t),\overline{\theta},\theta)
+\]
+$\overline{\theta}$ is the set of known parameters, $\theta$ the set of unknown parameters
+\subsection{Performance index}
+\[
+J_N(\theta)=\frac{1}{N}
+\sum_{t=1}^N
+\left(
+\overline{y}(t)
+-
+\mathcal{M}(\overline{u}(t),\overline{\theta},\theta)
+\right)^2
+\]
+\subsection{Optimization}
+\[
+\hat{\theta}_N=\arg\min_\theta J_N(\theta)
+\]
+\subsection{Limitations}
+\begin{itemize}
+\item Usually $J_N$ has no analytic expression
+\item Computing the value of $J_N$ requires an entire simulation from $t=1$ to $t=N$
+\item Usually $J_N$ is non-quadratic and non-convex $\rightarrow$ iterative and randomizad optimization must be used
+\item Computationally demanding
+\end{itemize}
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (F1) [] {$\overline{F}(t)$};
+\node (sysmod) [right=of F1,block,align=center] {Model of \\ the system};
+\node (y) [right=2 of sysmod]{$\overline{y}(t)$};
+\node (F2) [below=3 of F1]{$\overline{F}(t)$};
+\node (mod) [right=of F2,block,align=center]{Model\\$\mathcal{M}(\theta)$};
+\node (add) [right=2 of mod,add]{};
+\node (J) [below=of add,block]{$J(\theta)$};
+\draw[arrow] (F1)--(sysmod);
+\draw[arrow] (sysmod)--(y);
+\draw[arrow] (sysmod)-|node[pos=.95]{-}(add);
+\draw[arrow] (F2)--(mod);
+\draw[arrow] (mod)--node[midway]{$\hat{y}(t)$} node[pos=.90]{+} (add);
+\draw[arrow] (add)--node[midway]{\tiny simulation error}(J);
+\draw[arrow] (J)-|(mod);
+\end{tikzpicture}
+\end{center}
+
+\part{Minimum Variance Control}
+\part{Recursive Identification}
 
 
 \newpage
