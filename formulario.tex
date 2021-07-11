@@ -9,7 +9,7 @@
 \tikzstyle{block}=[draw, minimum size=3.5em]
 \tikzstyle{add}=[circle,draw]
 \tikzstyle{arrow}=[thick,->,>=stealth]
-\usetikzlibrary{shapes.geometric,arrows,positioning}
+\usetikzlibrary{shapes.geometric,arrows,positioning,calc}
 
 \usepackage{titlesec, hyperref}
 \newcommand{\sectionbreak}{\clearpage}
@@ -144,7 +144,7 @@ Given $\eta(t) \sim WN(0,\lambda^2)$
 	E[v(t)]		&=	c_0\cdot E[\eta(t)]	&	&+	c_1\cdot E[\eta(t)]	\\
 				&=	c_0\cdot 0			&	&+	c_1\cdot 0			\\
 	\Aboxed{E[v(t)]&=0}
-\end{alignat*}\\
+\end{alignat*}
 
 
 \subparagraph{Variance}
@@ -1400,7 +1400,7 @@ We get $S_{ux}(z,\hat{\theta}_N)$ and $S_{yx}(z,\hat{\theta}_N)$, the transfer f
 \draw[arrow] (y3) -- node[midway]{$y(t-n_y)$} (y3-|sys.west);
 \end{tikzpicture}
 \end{center}
-\section{IRR scheme}
+\subsection{IRR scheme}
 \begin{center}
 \begin{tikzpicture}[node distance=1cm,auto,>=latex']
 \node (x) [] {$x(t)$};
@@ -1443,7 +1443,7 @@ We get $S_{ux}(z,\hat{\theta}_N)$ and $S_{yx}(z,\hat{\theta}_N)$, the transfer f
 \draw[arrow] (y3) -- node[midway]{$y(t-n_y)$} (y3-|sys.west);
 \end{tikzpicture}
 \end{center}
-\section{Physical regressors}
+\subsection{Physical regressors}
 Using the physical knowledge of the system, provide a set of regressors (ie: smaller and more meaningful set of signals) elaborated by a static non-linear system
 \begin{center}
 \begin{tikzpicture}[node distance=1cm,auto,>=latex']
@@ -1574,8 +1574,278 @@ J_N(\theta)=\frac{1}{N}
 \end{center}
 
 \part{Minimum Variance Control}
-\part{Recursive Identification}
+The goal is to design a feedback system
+\begin{itemize}
+\item Control design is the ain motivation of system identification and software sensing
+\item MVC is based on prediction theory
+\end{itemize}
+\section{Setup the problem}
+Consider a generic ARMAX model:
+\[
+y(t)=\frac{B(z)}{A(z)}u(t-k)
++\frac{C(z)}{A(z)}e(t)
+\qquad
+e(t)\sim WN(0,\lambda^2)
+\]
+\begin{align*}
+B(z)&=b_0+b_1z^{-1}+\dots+b_pz^{-p}\\
+A(z)&=1+a_1z^{-1}+\dots+a_mz^{-m}\\
+C(z)&=1+c_1z^{-1}+\dots+c_nz^{-n}
+\end{align*}
+\paragraph{Assumptions}
+\begin{itemize}
+\item $\frac{C(z)}{A(z)}$ is in canonical form
+\item $b_0\neq 0 \rightarrow$ k is the actual delay
+\item $\frac{B(z)}{A(z)}$ is minimum phase $\iff$ all the roots of $B(z)$ are strictly inside the unit circle
+\item $y^0(t)\perp e(t)$
+\item $y^0(t)$ is known only up to the present time ($y^0(t)$ is totally unpredictable)
+\end{itemize}
+We want to determine the optimal tracking of the desired output behaviour:
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (y0) [] {$y^0(t)$};
+\node (cont) [block, right=of y0, align=center] {controller\\algorithm};
+\node (Wu) [block, right=of cont]{$\frac{B(z)}{A(z)}$};
+\node (add) [add, right=of Wu]{};
+\node (We) [block,above=of add]{$\frac{C(z)}{A(z)}$};
+\node (e) [above=of We]{$e(t)$};
+\node (feed) [below = 1 of add, coordinate]{};
+\node (y) [right=of add]{$y(t)$};
+\draw[draw=none] (feed)--node[draw,rectangle,dotted,midway,
+		minimum width=4.3cm,
+		minimum height=5cm,
+ 		]{} node[below]{system}(y.south east);
+\draw[arrow] (y0)--(cont);
+\draw[arrow] (cont)--node[midway]{$u(t)$}(Wu);
+\draw[arrow] (Wu)--(add);
+\draw[arrow] (We)--(add);
+\draw[arrow] (e)--(We);
+\draw[arrow] (add)--(y);
+\draw (add)--(feed);
+\draw[arrow] (feed)-|(cont);
+\end{tikzpicture}
+\end{center}
+Formally, MVC tries to minimize the following performance index:
+\[
+J=E\left[(y(t)-y^0(t))^2\right)
+\]
+Which is the variance of the tracking error
+\subsection{Simplified problem 1}
+\[
+S:y(t)=ay(t-1)+b_0u(t-1)+b_1u(t-2)
+\qquad
+y(t)=\frac{b_0+b_1z^{-1}}{1-az^{-1}}u(t-1)
+\]
+Assuming:
+\begin{itemize}
+\item $y^0(t)=\overline{y}^0$
+\item no noise
+\item $b_0\neq 0$
+\item Root of numerator inside the unit circle
+\end{itemize}
+\begin{align*}
+J&=\left(y(t)-y^0(y)\right)^2\\
+&=\left(y(t)-\overline{y}^0\right)^2\\
+&=\left(ay(t-1)+b_0u(t-1)+b_1u(t-2)-\overline{y^0}\right)^2\\
+&=\left(ay(t)+b_0u(t)+b_1u(t-1)-\overline{y^0}\right)^2\\
+\frac{\delta J}{\delta u(t)}&=2\left(ay(t)+b_0u(t)+b_1\underbrace{u(t-1)}_{\substack{\text{number}\\\text{not variable}}}-\overline{y^0}\right)(b_0)
+\end{align*}
+\[
+\frac{\delta J}{\delta u(t)}=0
+\implies
+ay(t)+b_0u(t)+b_1u(t-1)-\overline{y^0}=0
+\implies
+u(t)=(\overline{y}^0-ay(t))\frac{1}{b_0+b_1z^{-1}}
+\]
+\subsection{Simplified problem 2}
+\[
+S:y(t)=ay(t-1)+b_0u(t-1)+b_1u(t-2)+e(t)
+\qquad
+e(t)\sim WN(0,\lambda^2)
+\]
+\paragraph{Reference variable} $y^0(t)$
+\paragraph{Performance index} $E\left[(y(t)-y^0(t))^2\right]$
+\paragraph{Trick} rewrite $y(t)$ as
+\[
+y(t)=\hat{y}(t|t-1)+\epsilon(t)
+\]
+\[
+k=1 
+\implies \epsilon(t)=e(t) 
+\implies y(t)=\hat{y}(t|t-1)+e(t)
+\]
+\begin{align*}
+J&=E\left[\left(\hat{y}(t|t-1)+e(t)-y^0(t)\right)^2\right]\\
+&=E\left[\left((\hat{y}(t|t-1)-y^0(t))+e(t)\right)^2\right]\\
+&=E\left[\left(\hat{y}(t|t-1)-y^0(t)\right)^2\right]
++E\left[e(t)^2\right]
++\cancel{
+2E\left[e(t)(\hat{y}(t|t-1)-y^0(t))\right]
+}\\
+\end{align*}
+\[
+\arg \min_{y^0(t)} E\left[\left(\hat{y}(t|t-1)-y^0(t)\right)^2\right]
++E\left[e(t)^2\right]
+=
+\arg \min_{y^0(t)} E\left[\left(\hat{y}(t|t-1)-y^0(t)\right)^2\right]
+\]
+The best result is when $\hat{y}(t|t-1)=y^0(t)$. Writing the system in terms of transfer functions we get:
+\[
+S:y(t)=
+\frac{b_0+b_1z^{-1}}{1-az^{-1}}
+u(t-1)
++
+\frac{1}{1-az^{-1}}e(t)
+\]
+Applying the general 1-step predictor for $ARMAX$:
+\[
+\hat{y}(t|t-1)=\frac{b_0+b_1z^{-1}}{1}u(t-1)
++
+\frac{1-1+az^{-1}}{1}y(t)
+=
+(b_0b_1z^{-1})u(t-1)+ay(t-1)
+\]
+Imposing the optimality condition we get:
+\begin{align*}
+b_0u(t-1)+b_1u(t-2)+ay(t-1)&=y^0(t)\\
+b_0u(t)+b_1u(t-1)+ay(t)&=y^0(t+1)\\
+u(t)&=\left(y^0(t+1)-ay(t)\right)\frac{1}{b_0b_1z^{-1}}
+\end{align*}
+Since we cannot predict the future we must approximate:
+\[
+u(t)
+\approx
+\left(y^0(t)-ay(t)\right)
+\frac{1}{b_0+b_1z^{-1}}
+\]
+\subsection{General solution}
+\[
+S:y(t)=
+\frac{B(z)}{A(z)}u(t-k)+
+\frac{C(z)}{A(z)}e(t)
+\qquad
+e(t)\sim WN(0,\lambda^2)
+\]
+\paragraph{Assumptions}
+\begin{itemize}
+\item $b_0\neq 0$
+\item $B(z)$ has all roots inside the unit circle
+\item $\frac{C(z)}{A(z)}$ is in canonical form
+\item $y^0(t)\perp e(t)$
+\item $y^0(t)$ is unpredictable
+\end{itemize}
+\paragraph{Trick} rewrite $y(t)=\hat{y}(t|t-k)+\epsilon(t)$
+\begin{align*}
+J&=E\left[\left(\hat{y}(t|t-k)+\epsilon(t)-y^0(t)\right)^2\right]\\
+&=E\left[\left((\hat{y}(t|t-k)-y^0(t))+\epsilon(t)\right)^2\right]\\
+&=E\left[\left(
+\hat{y}(t|t-k)-y^0(t)\right)^2\right]
++E\left[\epsilon(t)^2\right]
++\cancel{2E\left[\epsilon(t)\left(\hat{y}(t|t-k)-y^0(t)\right)\right]}\\
+&=E\left[\left(
+\hat{y}(t|t-k)-y^0(t)\right)^2\right]+\textbf{constant}
+\end{align*}
 
+\part{Recursive Identification}
+\section{Least square}
+\[
+\hat{\theta}_N=\arg\min_\theta
+\left\lbrace
+J_N(\theta)=
+\frac{1}{N}\sum_{t=1}^{N}
+\left(
+y(t)-\hat{y}(t|t-1,\theta)
+\right)^2
+\right\rbrace
+\]
+We want to find the predictor model $\hat{y}(t|t-1,\theta)$
+\[
+y(t)=\phi(t)^T\theta+e(t)
+\]
+Since $e(t)$ is unpredictable, the best possible 1-step predictor is $\hat{y}(t|t-1,\theta)=\phi(t)^T\theta$. Substituting in $J$:
+\[
+J_N(\theta)=\frac{1}{N}
+\sum_{t=1}^N
+\left(y(t)-\phi(t)^T\theta\right)^2
+\]
+Analytically we can find the minimum:
+\begin{align*}
+\frac{\delta J_N(\theta)}{\delta \theta}&=0\\
+\hat{\theta}_N&=S(N)^{-1}\sum_{t=1}^N \phi(t)y(t)\\
+S(N)&=\sum_{t=1}^N \phi(t)\phi(t)^T
+\end{align*}
+But the procedure must be repeated at each $t$ step
+\subsection{Recursive Least Square}
+\begin{center}
+\begin{tikzpicture}[node distance=1cm,auto,>=latex']
+\node (theta) [] {$\hat{\theta}_{N-1}$};
+\node (phi) [below=of theta] {$\phi(N)$};
+\coordinate (mid) at ($(theta.east)!0.5!(phi.east)$);
+\node (RLS) [right=of mid,block,minimum height=2cm,minimum width=2cm]{RLS};
+\node (res) [right=of RLS] {$\hat{\theta}_N$};
+\draw[arrow] (theta)--(theta-|RLS.west);
+\draw[arrow] (phi)--(phi-|RLS.west);
+\draw[arrow] (RLS)--(res);
+\end{tikzpicture}
+\end{center}
+\subsection{First form}
+\begin{align*}
+\hat{\theta}_N&=S(N)^{-1}\sum_{t=1}^N \phi(t)y(t)\\
+S(N)\hat{\theta}_N&=\sum_{t=1}^N \phi(t)y(t)\\
+S(N-1)\hat{\theta}_{N-1}&=\sum_{t=1}^{N-1} \phi(t)y(t)\\
+\sum_{t=1}^N \phi(t)y(t)&=\sum_{t=1}^{N-1} \phi(t)y(t)+\phi(N)y(N)\\
+\sum_{t=1}^N \phi(t)y(t)&=S(N-1)\hat{\theta}_{N-1}+\phi(N)y(N)\\
+\Aboxed{
+\hat{\theta}_N&=\hat{\theta}_{N-1}+S(N)^{-1}\phi(N)\left[y(N)-\phi(N)^T\hat{\theta}_{N-1}\right]
+}\\
+S(N)&=S(N-1)+\phi(N)\phi(N)^T
+\end{align*}
+However, this way $S(N)\to\infty$, so the domputing unit saturates.
+\subsection{Second form} Normalize wrt. $N$
+\begin{align*}
+S(N)&=S(N-1)+\phi(N)\phi(N)^T\\
+R(N)&=\frac{1}{N}S(N)\\
+R(N)&=\frac{N-1}{N}R(N-1)+\frac{1}{N}\phi(N)\phi(N)^T\\
+K(N)&=\frac{1}{N}R(N)^{-1}\phi(N)\\
+\epsilon(N)&=y(N)-\phi(N)^T\hat{\theta}_{N-1}\\
+\Aboxed{
+\hat{\theta}_N&=\hat{\theta}_{N-1}+K(N)\epsilon(N)
+}
+\end{align*}
+This however reqires matrix inversion at each iteration, which is expensive
+\subsection{Third form} 
+It can be proven that the following works
+\begin{align*}
+\epsilon(N)&=y(N)-\phi(N)^T\hat{\theta}_{N-1}\\
+\Aboxed{
+V(N)&=V(N-1)-
+\frac{
+	V(N-1)\phi(N)\phi(N)^TV(N-1)
+}{
+	1+\phi(N)^TV(N-1)\phi(N)
+}
+}\\
+\Aboxed{
+K(N)&=V(N)\phi(N)
+}\\
+\hat{\theta}_N&=\hat{\theta}_{N-1}+K(N)\epsilon(N)
+\end{align*}
+This does not require matrix inversion
+\subsection{Forgetting factor}
+If theta contains some parameter changing over time, the objective function should "forget" old data. The new objective function becomes:
+\[
+J_N(\theta)=\frac{1}{N}
+\rho^{N-t}\left(\hat{y}(t|t-1,\theta)\right)^2
+\]
+Where $\rho\in\left[0,1\right]$ is the forgetting factor (the smaller, the more forgetful). The new equations become:
+\begin{align*}
+\epsilon(N)&=y(N)-\phi(N)^T\hat{\theta}_{N-1}\\
+\Aboxed{
+S(N)&=\rho S(N-1)+\phi(N)\phi(N)^T
+}\\
+K(N)&=S(N)^{-1}\phi(N)\\
+\hat{\theta}_N&=\hat{\theta}_{N-1}+K(N)\epsilon(N)
+\end{align*}
 
 \newpage
 \part{Cheatsheet}
