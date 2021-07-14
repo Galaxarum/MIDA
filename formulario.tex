@@ -12,7 +12,7 @@
 \usetikzlibrary{shapes.geometric,arrows,positioning,calc}
 
 \usepackage{titlesec, hyperref}
-\newcommand{\sectionbreak}{\clearpage}
+%\newcommand{\sectionbreak}{\clearpage}
 \newcommand{\R}{\mathbb{R}}
 
 \let\OldPart\part
@@ -1848,6 +1848,7 @@ K(N)&=S(N)^{-1}\phi(N)\\
 \end{align*}
 
 \newpage
+\appendix
 \part{Cheatsheet}
 \section{Probability Recall}
 \paragraph{Cross-Variance}
@@ -1933,4 +1934,291 @@ $\begin{vmatrix}
 \frac{C(z)-A(z)}{C(z)}y(t)
 +\frac{B(z)}{C(z)}u(t-1)$
 \end{description}
+\section{State-space representation}
+\[
+\begin{cases}
+x(t+1)=Fx(t)+Gu(t)&\quad\text{state equations}\\
+y(t)=Hx(t)+Du(t)&\quad\text{output equations}
+\end{cases}
+\]
+\section{BB representations shift}
+
+\subsection{State space to Transfer function}
+\[
+W(z)=H(zI-F)^{-1}G
+\]
+
+\subsection{Transfer Function to State Space}
+\[
+W(z)=\frac{b_0z^{n-1}+b_1z^{n-2}+\dots+b_{n-1}}{z^n+a_0z^{n-1}+\dots+a_n}
+\]
+\[\implies\]
+\[
+F=
+\begin{bmatrix}
+0&1&0&\dots&0\\
+0&0&1&\ddots&\vdots\\
+\vdots&\vdots&\ddots&\ddots&0\\
+0&0&\dots&0&1\\
+-a_n&-a_{n-1}&\dots&\dots&-a_1
+\end{bmatrix}
+\quad
+G=\begin{bmatrix}
+0\\0\\\vdots\\0\\1
+\end{bmatrix}
+\quad
+H=\begin{bmatrix}
+b_{n-1}&b_{n-2}&\dots&b_0
+\end{bmatrix}
+\quad
+D=0
+\]
+
+\subsection{Transfer function to Impulse response}
+$\infty$ long division of $W(z)$
+
+\subsection{Impulse response to Tranfer function}
+\paragraph{Z-transform} 
+\[
+\mathcal{Z}=\sum_{t=0}^\infty s(t)z^{-t}
+\]
+\[
+W(z)=\mathcal{Z}(\omega(t))=\sum_{t=0}^\infty \omega(t)z^{-1}
+\]
+
+\subsection{State space to Impulse response}
+\[
+\omega(t)=
+\begin{cases}
+0 & \text{if } t=0\\
+HF^{t-1}G & \text{if } t>0
+\end{cases}
+\]
+
+\section{Controllability and Observability}
+
+\subsection{Fully observable system} $\iff O$ is full rank:
+\[
+O=\begin{bmatrix}
+H\\HF\\\vdots\\HF^{n-1}
+\end{bmatrix}
+\qquad
+rank(O)=n
+\]
+\subsection{Fully controllable system} Fully controllable $\iff R$ is full rank:
+\[
+R=\begin{bmatrix}
+G&FG&\dots&F^{n-1}G
+\end{bmatrix}
+\qquad
+rank(R)=n
+\]
+
+\subsection{Hankel Matrix}
+Starting from $\omega(1),\omega(2),\dots,\omega(N)$ where $N\geq 2n-1$, we can build the Hankel Matrix of order $n$:
+\[
+H_n=\begin{bmatrix}
+\omega(1)&\omega(2)&\omega(3)&\dots&\omega(n)\\
+\omega(2)&\omega(3)&\omega(4)&\dots&\omega(n+1)\\
+\omega(3)&\omega(4)&\omega(5)&\dots&\omega(n+2)\\
+\vdots&\vdots&\vdots&\ddots&\vdots\\
+\omega(n)&\omega(n+1)&\omega(n+2)&\dots&\omega(2n-1)\\
+\end{bmatrix}
+\]
+\[
+H_n=
+\begin{bmatrix}
+HG&HFG&HF^2G&\dots&HF^{n-1}G\\
+\vdots&\ddots&&&\vdots\\
+\vdots&&\ddots&&\vdots\\
+\vdots&&&\ddots&\vdots\\
+HF^{n-1}G&\dots&\dots&\dots&HF^{2n-2}G
+\end{bmatrix}
+=
+\begin{bmatrix}
+H\\HF\\\vdots\\HF^{n-1}
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+G&FG&\dots&F^{n-1}G
+\end{bmatrix}
+=
+O\cdot R
+\]
+
+\part{System Identification}
+\paragraph{Impulse experiment} Measure $y(t)$ under the input $u(t)=\imp (0)$
+
+\section{$F,G,H$ from noise-free IR}
+\begin{enumerate}
+\item
+	\[
+	H_1=\begin{bmatrix}
+	\omega(1)
+	\end{bmatrix}
+	\quad
+	H_2=\begin{bmatrix}
+	\omega(1)&\omega(2)\\
+	\omega(2)&\omega(3)
+	\end{bmatrix}
+	\quad
+	H_3=\dots
+	\quad
+	\dots
+	\quad
+	H_n=\dots
+	\]
+	If $rank(H_n)=rank(H_{n+1})$, then $n$ is the order of the system 
+\item Factorize $H_{n+1}$ as $H_{n+1}=O_{n+1[(n+1)\times n]}\cdot R_{n+1[n\times(n+1)]}$
+	\[
+	O_{n+1}=\begin{bmatrix}
+	H\\HF\\\vdots\\HF^n
+	\end{bmatrix}
+	\qquad
+	R_{n+1}=\begin{bmatrix}
+	G&FG&\dots&F^nG
+	\end{bmatrix}
+	\]
+\item $H=O[0]$, $G=R[0]$
+\item Define\[
+	O_1=\begin{bmatrix}
+	H\\HF\\\vdots\\HF^{n-1}
+	\end{bmatrix}
+	\qquad
+	O_2=\begin{bmatrix}
+	HF\\\vdots\\HF^n
+	\end{bmatrix}\\
+	\]
+\item $F=O_1^{-1}O_2$
+\end{enumerate}
+
+\section{Obtain $F,G,H$ from a noisy IR (TODO: not well understood)}
+%TODO
+The measurement is of $\hat{\omega}(t)=\omega(t)+\eta(t)$. To identify the process:
+\begin{enumerate}
+\item Build the Hankel matrix using all the $N$ data:
+\[
+\hat{H}_{q \times d}=
+\begin{bmatrix}
+\hat{\omega}(1)&\hat{\omega}(2)&\dots&\hat{\omega}(d)\\
+\hat{\omega}(2)&\hat{\omega}(3)&\dots&\hat{\omega}(d+1)\\
+\vdots&\vdots&\ddots&\vdots\\
+\hat{\omega}(q)&\hat{\omega}(q+1)&\dots&\hat{\omega}(q+d+1=N)\\
+\end{bmatrix}
+\]
+\item Calculate the Singular Value Decomposition of $\hat{H}_{q \times d}$:
+\[
+\hat{H}_{q \times d}=\hat{U}_{q \times q} \cdot \hat{S}_{q \times d} \cdot \hat{V}^T_{d \times d}
+\]
+$\hat{U}$ and $\hat{V}$ are unitary matrices: they are invertible and their inverses are equal to their transpose.
+\[
+\hat{S}=\begin{bmatrix}
+\sigma_1\\
+&\sigma_2\\
+&&\ddots\\
+&&&\sigma_d
+\end{bmatrix}
+\]
+\item Plot the singular values ($\sigma_i$)and cut-off the three matrices:
+	\begin{itemize}
+	\item Ideally, after a certain $n$ (the order of the IR) there would be a jump dividing the signal (before) from the noise (after)
+	\item In reality no clear distinction exists, but it's possible to identify an interval of possible values of $n$. A tradeoff between complexity, precision and oferfitting takes place
+	\end{itemize}
+\item Split $\hat{U},\hat{S},\hat{V}^T$ obtaining $U_{q \times n}$, $S_{n \times n}$, $V^T_{n \times d}$ and then recreate $H_{qd}=USV^T$
+\item $H$ and $G$ are estimated as for the unnoisy case. To estimate $F$ we can build $O_1$ and $O_2$ as before, but then the system $O_1 \cdot F = O_2$ cannot be solved directly as $O_1$ is not square. We can instead compute the approximate least-square solution of the system:
+\[
+F=(O_1^TO_1)^{-1}O_1^TO_2
+\]
+\end{enumerate}
+
+\part{Kalman Filter}
+\section{Representations}
+\subsection{For basic systems}
+\begin{align*}
+\hat{x}(t+1|t)&=F\hat{x}(t|t-1)+K(t)e(t)&\text{state equation}\\
+\hat{y}(t|t-1)&=H\hat{x}(t|t-1)&\text{output equation}\\
+e(t)&=y(t)-\hat{y}(t|t-1)&\text{prediction error}\\
+K(t)&=\left(FP(t)H^T+V_{12}\right)\left(HP(t)H^T+V_2\right)^{-1}&\text{gain of the KF}\\
+P(t+1)&=\left(FP(t)F^T+V_1\right)\\
+&-\left(FP(t)H^T+V{12}\right)\left(HP(t)H^T+V_2\right)^{-1}\left(FP(t)H^T+V_{12}\right)^T&\text{difference Riccati equation}\\
+\hline
+\hat{x}(1|0)&=E\left[x(1)\right]=X_0&\text{Initial state}\\
+P(1)&=var\left[x(1)\right]=P_0&\text{initial DRE}
+\end{align*}
+\subsection{With input}
+\begin{align*}
+\hat{x}(t+1|t)&=F\hat{x}(t|t-1)\color{blue}+Gu(t)\color{black}+K(t)e(t)&\text{state equation}\\
+\text{other equations}&=\text{unchanged}
+\end{align*}
+\subsection{Multi-step prediction}
+Knowing $\hat{x}(t+1|T)$ from the basic solution we can derive
+\begin{align*}
+\hat{x}(t+k|t)&=F^{k-1}\hat{x}(t+1|t)\\
+\hat{y}(t+k|t)&=H\hat{x}(t+k|t)
+\end{align*}
+\subsection{Filter ($\hat{x}(t|t))$}
+\paragraph{$F$ invertible}
+\[
+\hat{x}(t+1|t)=F\hat{x}(t|t)
+\qquad\implies\qquad
+\hat{x}(t|t)=F^{-1}\hat{x}(t+1|t)
+\]
+\paragraph{$F$ not invertible} assuming $V_{12}=0$:
+\begin{align*}
+\hat{x}(t|t)&=F\hat{x}(t-1|t-1)+Gu(t-1)+K_0(t)e(t)\\
+\hat{y}(t|t-1)&=H\hat{x}(t|t-1)\\
+e(t)&=y(t)-\hat{y}(t|t-1)\\
+K_0(t)&=\left(P(t)H^T\right)\left(HP(t)H^T+V_2\right)^{-1}\\
+P(t+1)&=\text{unchanged }
+\end{align*}
+\subsection{Time-varying systems}
+\[
+S:\begin{cases}
+x(t+1)=F(t)x(t)+G(t)u(t)+v_1(t)\\
+y(t)=H(t)x(t+v_2(t))
+\end{cases}
+\]
+K.F. equations are unchanged
+\section{Asymptotic KF}
+\subsection{ARE}
+\[
+\overline{P}=
+\left(
+F\overline{P}F^T+V_1
+\right)-\left(
+F\overline{P}H^T+V_{12}
+\right)\left(
+H\overline{P}H^T+V_2
+\right)^{-1}\left(
+F\overline{P}H^T+V_{12}
+\right)^T
+\]
+\subsubsection{First asymptotic theorem}
+$V_{12}=0$ and the system is asymptotically stable (all eigenvalues of $F$ strictly inside the unit circle) $\implies$:
+\begin{itemize}
+\item $\exists!$ solution of ARE: $\overline{P}\geq 0$
+\item DRE converges to $\overline{P}\quad\forall P_0\geq 0$
+\item The corresponding $\overline{K}$ will make the KF asymptotically stable
+\end{itemize}
+\subsubsection{Second asymptotic theorem}
+$V_{12}=0$, $(F,H)$ is observable, $(F,\Gamma)$ is controllable $\implies$
+\begin{itemize}
+\item $\exists!$ solution of ARE: $\overline{P}\geq 0$
+\item DRE converges to $\overline{P}\quad\forall P_0\geq 0$
+\item The corresponding $\overline{K}$ will make the KF asymptotically stable
+\end{itemize}
+\section{Non-linear systems}
+\begin{align*}
+F(t)&=\left.\frac{\delta f(x(t),u(t))}{\delta x(t)}\right\vert_{x(t)=\hat{x}(t|t-1)}\\
+H(t)&=\left.\frac{\delta h(x(t))}{\delta x(t)}\right\vert_{x(t)=\hat{x}(t|t-1)}
+\end{align*}
+\section{Optimizing $K$}
+%TODO
+\part{Minimum Variance Control}
+\[
+y(t)=ay(t-1)+b_0u(t-1)+b_1u(t-2)+e(t)
+\implies
+u(t)\approx \left(y^0(t)-ay(t)\right)\frac{1}{b_0+b_1z^{-1}}
+\]
+
 \end{document}
